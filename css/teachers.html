@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المعلمون - منصة التعليم التفاعلي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .teacher-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            margin-bottom: 2rem;
+        }
+        
+        .teacher-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .teacher-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .teacher-rating {
+            color: var(--warning);
+            margin: 0.5rem 0;
+        }
+        
+        .teacher-subjects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        
+        .subject-tag {
+            background: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .teacher-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>منصة التعليم التفاعلي</h1>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html">لوحة التحكم</a></li>
+                        <li><a href="courses.html">الدروس</a></li>
+                        <li><a href="teachers.html" class="active">المعلمون</a></li>
+                        <li><a href="exams.html">الاختبارات</a></li>
+                        <li><a href="chat.html">الدردشة</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-actions">
+                    <span>مرحباً، <strong id="userTypeDisplay">طالب</strong></span>
+                    <a href="profile.html" class="btn btn-outline">الملف الشخصي</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <h2>معلمونا المتميزون</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: var(--gray);">
+                تعرف على فريقنا من المعلمين المؤهلين ذوي الخبرة الواسعة
+            </p>
+            
+            <div class="cards-grid">
+                <div class="teacher-card">
+                    <div class="teacher-avatar">أ.ع</div>
+                    <h3>أحمد عبدالله</h3>
+                    <p>مدرس رياضيات متخصص</p>
+                    <div class="teacher-rating">★★★★★ 4.9</div>
+                    <div class="teacher-subjects">
+                        <span class="subject-tag">الجبر</span>
+                        <span class="subject-tag">الهندسة</span>
+                        <span class="subject-tag">حساب المثلثات</span>
+                    </div>
+                    <p>خبرة 8 سنوات في تدريس الرياضيات بمختلف المراحل التعليمية</p>
+                    <div class="teacher-stats">
+                        <div class="stat">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">طالب</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">نجاح</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary">التواصل</button>
+                        <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">الملف الشخصي</button>
+                    </div>
+                </div>
+                
+                <div class="teacher-card">
+                    <div class="teacher-avatar">م.س</div>
+                    <h3>منى السعيد</h3>
+                    <p>مدرسة لغة عربية</p>
+                    <div class="teacher-rating">★★★★★ 4.8</div>
+                    <div class="teacher-subjects">
+                        <span class="subject-tag">النحو</span>
+                        <span class="subject-tag">الصرف</span>
+                        <span class="subject-tag">الأدب</span>
+                    </div>
+                    <p>متخصصة في تدريس اللغة العربية وآدابها لجميع المستويات</p>
+                    <div class="teacher-stats">
+                        <div class="stat">
+                            <div class="stat-number">350+</div>
+                            <div class="stat-label">طالب</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-label">نجاح</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary">التواصل</button>
+                        <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">الملف الشخصي</button>
+                    </div>
+                </div>
+                
+                <div class="teacher-card">
+                    <div class="teacher-avatar">خ.ر</div>
+                    <h3>خالد راشد</h3>
+                    <p>مدرس علوم وفيزياء</p>
+                    <div class="teacher-rating">★★★★☆ 4.7</div>
+                    <div class="teacher-subjects">
+                        <span class="subject-tag">الفيزياء</span>
+                        <span class="subject-tag">الكيمياء</span>
+                        <span class="subject-tag">الأحياء</span>
+                    </div>
+                    <p>خبرة في تدريس العلوم الطبيعية وتطبيقاتها العملية</p>
+                    <div class="teacher-stats">
+                        <div class="stat">
+                            <div class="stat-number">420+</div>
+                            <div class="stat-label">طالب</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">88%</div>
+                            <div class="stat-label">نجاح</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary">التواصل</button>
+                        <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">الملف الشخصي</button>
+                    </div>
+                </div>
+                
+                <div class="teacher-card">
+                    <div class="teacher-avatar">س.م</div>
+                    <h3>سارة محمد</h3>
+                    <p>مدرسة لغة إنجليزية</p>
+                    <div class="teacher-rating">★★★★★ 4.9</div>
+                    <div class="teacher-subjects">
+                        <span class="subject-tag">المحادثة</span>
+                        <span class="subject-tag">القواعد</span>
+                        <span class="subject-tag">الكتابة</span>
+                    </div>
+                    <p>متخصصة في تدريس اللغة الإنجليزية بطرق تفاعلية حديثة</p>
+                    <div class="teacher-stats">
+                        <div class="stat">
+                            <div class="stat-number">600+</div>
+                            <div class="stat-label">طالب</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">96%</div>
+                            <div class="stat-label">نجاح</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary">التواصل</button>
+                        <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">الملف الشخصي</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

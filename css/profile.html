@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - منصة التعليم التفاعلي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .profile-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .profile-stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .profile-main {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .profile-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+        
+        .profile-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .profile-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .achievement-card {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--warning);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .security-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>منصة التعليم التفاعلي</h1>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html">لوحة التحكم</a></li>
+                        <li><a href="courses.html">الدروس</a></li>
+                        <li><a href="teachers.html">المعلمون</a></li>
+                        <li><a href="exams.html">الاختبارات</a></li>
+                        <li><a href="chat.html">الدردشة</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-actions">
+                    <span>مرحباً، <strong id="userTypeDisplay">طالب</strong></span>
+                    <a href="profile.html" class="btn btn-outline active">الملف الشخصي</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <h2>الملف الشخصي</h2>
+            
+            <div class="profile-container">
+                <div class="profile-sidebar">
+                    <div class="profile-avatar">م.ح</div>
+                    <h3>محمد أحمد</h3>
+                    <p>طالب - الصف العاشر</p>
+                    <div style="color: var(--gray); margin: 0.5rem 0;">عضوية منذ: يناير 2024</div>
+                    
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <div class="stat-number">12</div>
+                            <div>دورة</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="stat-number">85%</div>
+                            <div>معدل</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%;">تعديل الصورة</button>
+                </div>
+                
+                <div class="profile-main">
+                    <div class="profile-tabs">
+                        <button class="profile-tab active" data-tab="info">المعلومات الشخصية</button>
+                        <button class="profile-tab" data-tab="achievements">الإنجازات</button>
+                        <button class="profile-tab" data-tab="security">الأمان</button>
+                    </div>
+                    
+                    <div id="infoTab" class="tab-content">
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">الاسم الأول</label>
+                                    <input type="text" id="firstName" value="محمد" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">اسم العائلة</label>
+                                    <input type="text" id="lastName" value="أحمد" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">البريد الإلكتروني</label>
+                                <input type="email" id="email" value="mohamed@example.com" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="phone">رقم الهاتف</label>
+                                    <input type="tel" id="phone" value="+966500000000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="grade">الصف الدراسي</label>
+                                    <select id="grade" required>
+                                        <option value="10">الصف العاشر</option>
+                                        <option value="11">الصف الحادي عشر</option>
+                                        <option value="12">الصف الثاني عشر</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bio">نبذة شخصية</label>
+                                <textarea id="bio" rows="4" placeholder="اكتب عن نفسك...">طالب مجد أحب التعلم وخاصة في مواد الرياضيات والعلوم</textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                        </form>
+                    </div>
+                    
+                    <div id="achievementsTab" class="tab-content" style="display: none;">
+                        <h3>الإنجازات والأوسمة</h3>
+                        
+                        <div class="achievement-card">
+                            <div class="achievement-icon">🥇</div>
+                            <div>
+                                <h4>الطالب المثالي</h4>
+                                <p>أعلى معدل في شهر فبراير</p>
+                                <small>تم النشر في: 2024-02-28</small>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement-card">
+                            <div class="achievement-icon">📚</div>
+                            <div>
+                                <h4>قارئ نهم</h4>
+                                <p>أكمل 10 دورات تعليمية</p>
+                                <small>تم النشر في: 2024-02-15</small>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement-card">
+                            <div class="achievement-icon">⚡</div>
+                            <div>
+                                <h4>متسابق سريع</h4>
+                                <p>أكمل 5 اختبارات في وقت قياسي</p>
+                                <small>تم النشر في: 2024-01-30</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="securityTab" class="tab-content" style="display: none;">
+                        <h3>إعدادات الأمان</h3>
+                        
+                        <div class="security-item">
+                            <div>
+                                <h4>كلمة المرور</h4>
+                                <p>آخر تحديث: منذ شهرين</p>
+                            </div>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">تغيير</button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div>
+                                <h4>المصادقة الثنائية</h4>
+                                <p>غير مفعلة</p>
+                            </div>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">تفعيل</button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div>
+                                <h4>جلسات النشطة</h4>
+                                <p>جهاز واحد نشط</p>
+                            </div>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">عرض</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // تبديل تبويبات الملف الشخصي
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const tabId = this.dataset.tab + 'Tab';
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+        
+        // حفظ بيانات الملف الشخصي
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('تم حفظ التغييرات بنجاح!');
+        });
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدروس - منصة التعليم التفاعلي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .courses-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            margin-bottom: 2rem;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .course-image {
+            height: 160px;
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            position: relative;
+        }
+        
+        .course-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .course-content {
+            padding: 1.5rem;
+        }
+        
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>منصة التعليم التفاعلي</h1>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html">لوحة التحكم</a></li>
+                        <li><a href="courses.html" class="active">الدروس</a></li>
+                        <li><a href="teachers.html">المعلمون</a></li>
+                        <li><a href="exams.html">الاختبارات</a></li>
+                        <li><a href="chat.html">الدردشة</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-actions">
+                    <span>مرحباً، <strong id="userTypeDisplay">طالب</strong></span>
+                    <a href="profile.html" class="btn btn-outline">الملف الشخصي</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <div class="courses-header">
+                <h2>الدروس التعليمية</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">الكل</button>
+                    <button class="filter-btn" data-filter="math">الرياضيات</button>
+                    <button class="filter-btn" data-filter="science">العلوم</button>
+                    <button class="filter-btn" data-filter="arabic">اللغة العربية</button>
+                    <button class="filter-btn" data-filter="english">اللغة الإنجليزية</button>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" placeholder="ابحث في الدروس..." id="searchInput">
+                <button class="btn btn-primary">بحث</button>
+            </div>
+            
+            <div class="cards-grid" id="coursesGrid">
+                <div class="course-card" data-category="math">
+                    <div class="course-image">
+                        <span>📐</span>
+                        <div class="course-badge">جديد</div>
+                    </div>
+                    <div class="course-content">
+                        <h3>الرياضيات المتقدمة</h3>
+                        <p>دورة شاملة في الرياضيات تشمل الجبر، الهندسة، وحساب المثلثات</p>
+                        <div class="course-meta">
+                            <span>🔢 24 درس</span>
+                            <span>⏱ 16 ساعة</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 65%"></div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">استمرار</button>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">معاينة</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="course-card" data-category="science">
+                    <div class="course-image">
+                        <span>🔬</span>
+                        <div class="course-badge">شائع</div>
+                    </div>
+                    <div class="course-content">
+                        <h3>علم الأحياء</h3>
+                        <p>استكشاف عالم الكائنات الحية من الخلية إلى النظام البيئي</p>
+                        <div class="course-meta">
+                            <span>🧬 18 درس</span>
+                            <span>⏱ 12 ساعة</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 40%"></div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">استمرار</button>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">معاينة</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="course-card" data-category="arabic">
+                    <div class="course-image">
+                        <span>📖</span>
+                    </div>
+                    <div class="course-content">
+                        <h3>قواعد اللغة العربية</h3>
+                        <p>إتقان قواعد النحو والصرف وتحسين المهارات الكتابية</p>
+                        <div class="course-meta">
+                            <span>📚 20 درس</span>
+                            <span>⏱ 14 ساعة</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 90%"></div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">استمرار</button>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">معاينة</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="course-card" data-category="english">
+                    <div class="course-image">
+                        <span>🔤</span>
+                        <div class="course-badge">جديد</div>
+                    </div>
+                    <div class="course-content">
+                        <h3>الإنجليزية للمبتدئين</h3>
+                        <p>بناء أساس قوي في اللغة الإنجليزية من الصفر</p>
+                        <div class="course-meta">
+                            <span>📝 30 درس</span>
+                            <span>⏱ 20 ساعة</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 25%"></div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">استمرار</button>
+                            <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">معاينة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // تصفية الدروس
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const courses = document.querySelectorAll('.course-card');
+                
+                courses.forEach(course => {
+                    if (filter === 'all' || course.dataset.category === filter) {
+                        course.style.display = 'block';
+                    } else {
+                        course.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // البحث في الدروس
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const courses = document.querySelectorAll('.course-card');
+            
+            courses.forEach(course => {
+                const title = course.querySelector('h3').textContent.toLowerCase();
+                const description = course.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    course.style.display = 'block';
+                } else {
+                    course.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

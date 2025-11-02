@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاختبارات - منصة التعليم التفاعلي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .exam-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+        
+        .exam-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .exam-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .exam-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-right: 4px solid var(--primary);
+        }
+        
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .exam-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .exam-meta {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .exam-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .question-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .options-list {
+            margin: 1rem 0;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .option:hover {
+            background: var(--light);
+        }
+        
+        .timer {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>منصة التعليم التفاعلي</h1>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html">لوحة التحكم</a></li>
+                        <li><a href="courses.html">الدروس</a></li>
+                        <li><a href="teachers.html">المعلمون</a></li>
+                        <li><a href="exams.html" class="active">الاختبارات</a></li>
+                        <li><a href="chat.html">الدردشة</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-actions">
+                    <span>مرحباً، <strong id="userTypeDisplay">طالب</strong></span>
+                    <a href="profile.html" class="btn btn-outline">الملف الشخصي</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <h2>الاختبارات والتقييمات</h2>
+            
+            <div class="exam-tabs">
+                <button class="exam-tab active" data-tab="active">الاختبارات النشطة</button>
+                <button class="exam-tab" data-tab="upcoming">القادمة</button>
+                <button class="exam-tab" data-tab="completed">المكتملة</button>
+            </div>
+            
+            <div id="activeExams" class="tab-content">
+                <div class="exam-card">
+                    <div class="exam-header">
+                        <div>
+                            <h3>اختبار الرياضيات - الفصل الأول</h3>
+                            <p>اختبار شامل لفصول الجبر والهندسة</p>
+                        </div>
+                        <div class="exam-badge">نشط</div>
+                    </div>
+                    
+                    <div class="exam-details">
+                        <div class="detail-item">
+                            <span>⏱️</span>
+                            <span>60 دقيقة</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>🔢</span>
+                            <span>20 سؤال</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>📅</span>
+                            <span>ينتهي في: 2024-03-15</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="startExam()">بدء الاختبار</button>
+                </div>
+                
+                <div class="exam-card">
+                    <div class="exam-header">
+                        <div>
+                            <h3>اختبار اللغة العربية - القواعد</h3>
+                            <p>اختبار في قواعد النحو والصرف</p>
+                        </div>
+                        <div class="exam-badge">نشط</div>
+                    </div>
+                    
+                    <div class="exam-details">
+                        <div class="detail-item">
+                            <span>⏱️</span>
+                            <span>45 دقيقة</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>🔢</span>
+                            <span>15 سؤال</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>📅</span>
+                            <span>ينتهي في: 2024-03-18</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="startExam()">بدء الاختبار</button>
+                </div>
+            </div>
+            
+            <div id="upcomingExams" class="tab-content" style="display: none;">
+                <div class="exam-card">
+                    <div class="exam-header">
+                        <div>
+                            <h3>اختبار العلوم - الكيمياء</h3>
+                            <p>اختبار في أساسيات الكيمياء</p>
+                        </div>
+                        <div class="exam-badge" style="background: var(--warning);">قادم</div>
+                    </div>
+                    
+                    <div class="exam-details">
+                        <div class="detail-item">
+                            <span>📅</span>
+                            <span>يبدأ في: 2024-03-20</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>⏱️</span>
+                            <span>50 دقيقة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="completedExams" class="tab-content" style="display: none;">
+                <div class="exam-card">
+                    <div class="exam-header">
+                        <div>
+                            <h3>اختبار التاريخ - الحضارات</h3>
+                            <p>اختبار في الحضارات القديمة</p>
+                        </div>
+                        <div class="exam-badge" style="background: var(--gray);">مكتمل</div>
+                    </div>
+                    
+                    <div class="exam-details">
+                        <div class="detail-item">
+                            <span>📊</span>
+                            <span>النتيجة: 85%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>📅</span>
+                            <span>تم في: 2024-02-28</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">عرض النتائج</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // تبديل تبويبات الاختبارات
+        document.querySelectorAll('.exam-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.exam-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const tabId = this.dataset.tab + 'Exams';
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+        
+        function startExam() {
+            if (confirm('هل أنت مستعد لبدء الاختبار؟ سيبدأ العد التنازلي فوراً.')) {
+                window.location.href = 'exam-session.html';
+            }
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

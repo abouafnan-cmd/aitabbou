@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - منصة التعليم التفاعلي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-right: 4px solid var(--primary);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .action-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>منصة التعليم التفاعلي</h1>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="dashboard.html" class="active">لوحة التحكم</a></li>
+                        <li><a href="courses.html">الدروس</a></li>
+                        <li><a href="teachers.html">المعلمون</a></li>
+                        <li><a href="exams.html">الاختبارات</a></li>
+                        <li><a href="chat.html">الدردشة</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-actions">
+                    <span>مرحباً، <strong id="userTypeDisplay">طالب</strong></span>
+                    <a href="profile.html" class="btn btn-outline">الملف الشخصي</a>
+                    <button onclick="logout()" class="btn btn-danger">تسجيل الخروج</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="dashboard">
+        <div class="container">
+            <h2>لوحة التحكم</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">الدروس المكتملة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">معدل النجاح</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">الاختبارات النشطة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">الواجبات الجديدة</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <a href="courses.html" class="action-btn">📖 الدروس</a>
+                <a href="exams.html" class="action-btn">📝 الاختبارات</a>
+                <a href="chat.html" class="action-btn">💬 الدردشة</a>
+                <a href="profile.html" class="action-btn">👤 الملف الشخصي</a>
+            </div>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>الدروس الجديدة</h3>
+                    <div class="activity-item">
+                        <div class="activity-icon">📐</div>
+                        <div>
+                            <strong>الرياضيات</strong>
+                            <p>الدرس الثالث: المعادلات التربيعية</p>
+                            <small>منذ ساعتين</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">🔬</div>
+                        <div>
+                            <strong>العلوم</strong>
+                            <p>تجارب التفاعلات الكيميائية</p>
+                            <small>منذ 5 ساعات</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>الاختبارات القادمة</h3>
+                    <div class="activity-item">
+                        <div class="activity-icon">⏰</div>
+                        <div>
+                            <strong>اختبار اللغة العربية</strong>
+                            <p>ينتهي في: 2024-03-15</p>
+                            <small>متبقي 3 أيام</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">⏰</div>
+                        <div>
+                            <strong>اختبار التاريخ</strong>
+                            <p>ينتهي في: 2024-03-18</p>
+                            <small>متبقي 6 أيام</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>التقدم الدراسي</h3>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>الرياضيات</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>العلوم</span>
+                            <span>60%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>اللغة العربية</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userType');
+            window.location.href = 'index.html';
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>
