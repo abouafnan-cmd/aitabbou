@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التعليم التفاعلي - الرئيسية</title>
+    <title>منصة حضور وغياب المواد الأربعة</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,23 +11,23 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <span class="logo-icon">📚</span>
-                    <h1>منصة التعليم التفاعلي</h1>
+                    <span class="logo-icon">🗓️</span>
+                    <h1>تتبع حضور الطلبة</h1>
                 </div>
-                
+
                 <nav>
                     <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
-                        <li><a href="chat.html">الدردشة</a></li>
+                        <li><a href="#">الرئيسية</a></li>
+                        <li><a href="#features">المزايا</a></li>
+                        <li><a href="#subjects">المواد</a></li>
+                        <li><a href="#reports">التقارير</a></li>
+                        <li><a href="#workflow">الإشعارات</a></li>
                     </ul>
                 </nav>
-                
+
                 <div class="user-actions">
-                    <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
-                    <a href="register.html" class="btn btn-primary">انضم إلينا</a>
+                    <a href="#reports" class="btn btn-outline">عرض الإحصائيات</a>
+                    <a href="#subjects" class="btn btn-primary">تسجيل حضور جديد</a>
                 </div>
             </div>
         </div>
@@ -36,40 +36,261 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <h2>منصة تعليمية متكاملة للتواصل مع الطلاب</h2>
-                <p>تقديم تجربة تعليمية تفاعلية تجمع بين الطلاب والمعلمين في بيئة تعاونية متطورة</p>
-                <div class="hero-buttons">
-                    <a href="register.html" class="btn btn-primary">ابدأ التعلم الآن</a>
-                    <a href="#features" class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">استكشف المنصة</a>
+                <div class="hero-text">
+                    <div class="badge badge-success">منصة يومية لتسجيل حضور 4 مواد</div>
+                    <h2>إدارة حضور وغياب الطلبة بكفاءة عالية</h2>
+                    <p>سجل حضور الطلبة في أربع مواد دراسية، حدّد أسباب الغياب، راقب النسب اليومية، وأرسل التنبيهات للطلبة والمشرفين في لحظات.</p>
+                    <div class="hero-buttons">
+                        <a href="#subjects" class="btn btn-primary">ابدأ تسجيل الحضور</a>
+                        <a href="#features" class="btn btn-outline" style="border-color: rgba(255,255,255,0.7); color: white;">استكشف إمكانيات المنصة</a>
+                    </div>
+                </div>
+
+                <div class="hero-panel">
+                    <h3 style="margin-bottom: 1rem;">نظرة سريعة لهذا اليوم</h3>
+                    <div class="panel-row">
+                        <div class="mini-card">
+                            <h4>معدل الحضور العام</h4>
+                            <div class="value">92%</div>
+                            <small>المواد الأربعة - آخر محاضرة</small>
+                        </div>
+                        <div class="mini-card">
+                            <h4>إشعارات مرسلة</h4>
+                            <div class="value">34 إشعار</div>
+                            <small>تنبيهات الغياب والأعذار</small>
+                        </div>
+                        <div class="mini-card">
+                            <h4>غيابات بدون عذر</h4>
+                            <div class="value">5 طلبة</div>
+                            <small class="badge badge-danger">يحتاجون متابعة</small>
+                        </div>
+                        <div class="mini-card">
+                            <h4>آخر نسخة احتياطية</h4>
+                            <div class="value">08:30 ص</div>
+                            <small class="badge badge-success">مفعّل يوميًا</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="features" id="features">
+    <section class="section" id="features">
         <div class="container">
             <div class="section-title">
-                <h2>مميزات منصتنا التعليمية</h2>
-                <p>نقدم مجموعة متكاملة من الأدوات لتحسين تجربة التعليم والتعلم</p>
+                <h2>مزايا أساسية للحضور والغياب</h2>
+                <p>أدوات يومية للمعلمين والمشرفين لمتابعة الحضور في المواد الأربعة.</p>
             </div>
-            
             <div class="cards-grid">
                 <div class="card">
-                    <div class="feature-icon">💬</div>
-                    <h3>غرف الحوار التفاعلية</h3>
-                    <p>تواصل مباشر بين الطلاب والمعلمين عبر غرف حوار تفاعلية منظمة حسب المواد الدراسية</p>
+                    <div class="feature-icon">✅</div>
+                    <h3>تسجيل فوري للحضور</h3>
+                    <p>إضافة حالة الحضور أو الغياب لكل مادة مع تحديد اليوم والمحاضرة، وتسجيل السبب الصحي أو الخاص أو بدون عذر.</p>
                 </div>
-                
                 <div class="card">
-                    <div class="feature-icon">📹</div>
-                    <h3>فصول افتراضية</h3>
-                    <p>انضم إلى فصول افتراضية حية مع سبورة تفاعلية ومشاركة الشاشة والتسجيلات</p>
+                    <div class="feature-icon">🧑‍🏫</div>
+                    <h3>أدوار متعددة</h3>
+                    <p>صلاحيات للمعلمين والمشرفين لإدارة المواد الأربعة، مراجعة السجلات، واعتماد الأعذار.</p>
                 </div>
-                
                 <div class="card">
-                    <div class="feature-icon">📂</div>
-                    <h3>مكتبة رقمية شاملة</h3>
-                    <p>الوصول إلى مكتبة ضخمة من المصادر التعليمية والمراجع والدروس المسجلة</p>
+                    <div class="feature-icon">📈</div>
+                    <h3>تقارير ونسب حضور</h3>
+                    <p>لوحات تعرض نسب الحضور لكل طالب ولكل مادة، مع مقارنة أسبوعية وتحليل أوقات الذروة في الغياب.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>تنبيهات تلقائية</h3>
+                    <p>إرسال إشعارات للطلاب عن حالات الغياب، وتنبيهات للمشرفين عند تجاوز حد الغياب المسموح.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="subjects">
+        <div class="container">
+            <div class="section-title">
+                <h2>المواد الأربعة والمتابعة اليومية</h2>
+                <p>بطاقات سريعة لكل مادة تعرض الحضور الحالي والأعذار المسجلة.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="card subject-card">
+                    <div class="subject-meta">
+                        <span>الرياضيات 101</span>
+                        <span>الأحد - الثلاثاء</span>
+                    </div>
+                    <h3>حضور اليوم</h3>
+                    <div class="progress-bar"><div class="progress" style="width: 94%"></div></div>
+                    <p style="margin: 0.5rem 0;">94% حضور - 1 غياب بدون عذر</p>
+                    <div class="status-row">
+                        <span class="badge badge-success">24 حاضر</span>
+                        <span class="badge badge-warning">2 أعذار</span>
+                        <span class="badge badge-danger">1 غياب</span>
+                    </div>
+                </div>
+                <div class="card subject-card">
+                    <div class="subject-meta">
+                        <span>تاريخ العالم</span>
+                        <span>الاثنين - الأربعاء</span>
+                    </div>
+                    <h3>حضور اليوم</h3>
+                    <div class="progress-bar"><div class="progress" style="width: 88%"></div></div>
+                    <p style="margin: 0.5rem 0;">88% حضور - 3 أعذار طبية</p>
+                    <div class="status-row">
+                        <span class="badge badge-success">22 حاضر</span>
+                        <span class="badge badge-warning">3 أعذار</span>
+                        <span class="badge badge-danger">0 غياب</span>
+                    </div>
+                </div>
+                <div class="card subject-card">
+                    <div class="subject-meta">
+                        <span>علوم الحاسوب</span>
+                        <span>الأربعاء - الخميس</span>
+                    </div>
+                    <h3>حضور اليوم</h3>
+                    <div class="progress-bar"><div class="progress" style="width: 91%"></div></div>
+                    <p style="margin: 0.5rem 0;">91% حضور - إشعار متأخرين</p>
+                    <div class="status-row">
+                        <span class="badge badge-success">21 حاضر</span>
+                        <span class="badge badge-warning">2 تأخير</span>
+                        <span class="badge badge-danger">0 غياب</span>
+                    </div>
+                </div>
+                <div class="card subject-card">
+                    <div class="subject-meta">
+                        <span>اللغة العربية</span>
+                        <span>الخميس</span>
+                    </div>
+                    <h3>حضور اليوم</h3>
+                    <div class="progress-bar"><div class="progress" style="width: 96%"></div></div>
+                    <p style="margin: 0.5rem 0;">96% حضور - لا يوجد غياب</p>
+                    <div class="status-row">
+                        <span class="badge badge-success">27 حاضر</span>
+                        <span class="badge badge-warning">0 أعذار</span>
+                        <span class="badge badge-danger">0 غياب</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="reports">
+        <div class="container">
+            <div class="section-title">
+                <h2>التقارير والتحليل</h2>
+                <p>جداول تفصيلية ونسب مئوية للحضور والغياب لكل طالب وكل مادة.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>سجل آخر محاضرة</h3>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>اسم الطالب</th>
+                                    <th>المادة</th>
+                                    <th>الحالة</th>
+                                    <th>السبب</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ليان خالد</td>
+                                    <td>الرياضيات 101</td>
+                                    <td class="status-present">حاضر</td>
+                                    <td>-</td>
+                                    <td>الثلاثاء 14 مايو</td>
+                                </tr>
+                                <tr>
+                                    <td>سالم ياسر</td>
+                                    <td>تاريخ العالم</td>
+                                    <td class="status-excused">غائب بعذر</td>
+                                    <td>تقرير طبي</td>
+                                    <td>الثلاثاء 14 مايو</td>
+                                </tr>
+                                <tr>
+                                    <td>جود أحمد</td>
+                                    <td>علوم الحاسوب</td>
+                                    <td class="status-absent">غياب</td>
+                                    <td>بدون عذر</td>
+                                    <td>الأربعاء 15 مايو</td>
+                                </tr>
+                                <tr>
+                                    <td>حنين محمود</td>
+                                    <td>اللغة العربية</td>
+                                    <td class="status-present">حاضر</td>
+                                    <td>-</td>
+                                    <td>الخميس 16 مايو</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>نسب الحضور السريعة</h3>
+                    <ul class="list">
+                        <li><strong>حضور الطلاب:</strong> 92% في المواد الأربعة هذا الأسبوع.</li>
+                        <li><strong>تنبيهات المشرفين:</strong> 6 حالات تجاوز حد الغياب.</li>
+                        <li><strong>أسباب الغياب:</strong> 9 أعذار طبية، 4 أعذار خاصة، 5 بدون عذر.</li>
+                        <li><strong>تعديلات السجلات:</strong> 3 سجلات تم تصحيحها بعد التحقق.</li>
+                        <li><strong>نسخ احتياطي:</strong> مفعّل تلقائيًا كل 12 ساعة مع حفظ سحابي.</li>
+                    </ul>
+                    <div style="margin-top: 1.5rem;" class="status-row">
+                        <span class="badge badge-success">متابعة يومية</span>
+                        <span class="badge badge-warning">مطلوب توثيق أعذار</span>
+                        <span class="badge badge-danger">راقب الغياب المتكرر</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="workflow">
+        <div class="container">
+            <div class="section-title">
+                <h2>تنبيهات وأدوار العمل</h2>
+                <p>مسار واضح للمعلمين والمشرفين مع إشعارات تلقائية ونسخ احتياطي مستمر.</p>
+            </div>
+            <div class="timeline">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>إدخال الحضور</h4>
+                    <p>المعلم يحدد المادة والمحاضرة اليومية، ويسجل حالة كل طالب مع الملاحظات.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>إرسال الإشعارات</h4>
+                    <p>يتم إرسال إشعار فوري للطلاب الغائبين، وإخطار المشرف عند تكرر الغياب.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>مراجعة الأعذار</h4>
+                    <p>المشرف يعتمد الأعذار الطبية أو الخاصة، ويعدل السجل عند الحاجة.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>النسخ الاحتياطي والتحليل</h4>
+                    <p>حفظ تلقائي للسجلات كل 12 ساعة مع تقارير أسبوعية عن نسب الحضور.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>خيارات التصفية والبحث</h3>
+                    <p>ابحث عن طالب محدد أو صفِّ النتائج حسب المادة أو حالة الحضور. التصفية تساعد المعلم على تتبع الطلبة الذين تتكرر غياباتهم خلال الأسابيع الأخيرة.</p>
+                </div>
+                <div class="card">
+                    <h3>تجربة مخصصة للأدوار</h3>
+                    <p>واجهة للمعلم لتسجيل الحضور اليومي، وواجهة للمشرف لمراجعة الإحصائيات والأعذار، مع وصول الطالب إلى سجل حضوره والتنبيهات المستلمة.</p>
+                </div>
+                <div class="card">
+                    <h3>الاحتفاظ بالبيانات</h3>
+                    <p>يتم حفظ جميع السجلات في قاعدة بيانات آمنة مع إمكانية النسخ الاحتياطي الدوري واستعادة البيانات في أي وقت.</p>
                 </div>
             </div>
         </div>
@@ -79,37 +300,34 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>منصة التعليم التفاعلي</h3>
-                    <p>نحو مستقبل تعليمي أفضل من خلال التكنولوجيا والابتكار</p>
+                    <h3>منصة تتبع الحضور</h3>
+                    <p>حل متكامل لتسجيل الحضور والغياب في أربعة مواد دراسية مع تقارير وتنبيهات متقدمة.</p>
                 </div>
-                
+
                 <div class="footer-column">
-                    <h3>روابط سريعة</h3>
+                    <h3>التنقل</h3>
                     <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
+                        <li><a href="#">الرئيسية</a></li>
+                        <li><a href="#features">المزايا</a></li>
+                        <li><a href="#subjects">المواد</a></li>
+                        <li><a href="#reports">التقارير</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-column">
                     <h3>الدعم</h3>
                     <ul>
                         <li><a href="#">الأسئلة الشائعة</a></li>
                         <li><a href="#">اتصل بنا</a></li>
-                        <li><a href="#">الشروط والأحكام</a></li>
                         <li><a href="#">سياسة الخصوصية</a></li>
                     </ul>
                 </div>
             </div>
-            
+
             <div class="copyright">
-                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+                <p>© 2024 منصة تتبع الحضور. جميع الحقوق محفوظة.</p>
             </div>
         </div>
     </footer>
-
-    <script src="js/script.js"></script>
 </body>
 </html>
