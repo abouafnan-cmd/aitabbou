@@ -3,113 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التعليم التفاعلي - الرئيسية</title>
+    <title>منصة تسجيل الحضور والغياب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
+    <header class="app-header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <span class="logo-icon">📚</span>
-                    <h1>منصة التعليم التفاعلي</h1>
+                <div class="brand">
+                    <span class="brand-icon">🗓️</span>
+                    <div>
+                        <p class="brand-label">نظام الحضور والغياب</p>
+                        <h1>حضور الطلبة</h1>
+                    </div>
                 </div>
-                
                 <nav>
-                    <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
-                        <li><a href="chat.html">الدردشة</a></li>
-                    </ul>
+                    <a href="#attendance">تسجيل الحضور</a>
+                    <a href="#students">إدارة الطلبة</a>
+                    <a href="#subjects">المواد والأقسام</a>
                 </nav>
-                
-                <div class="user-actions">
-                    <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
-                    <a href="register.html" class="btn btn-primary">انضم إلينا</a>
+                <div class="quick-stats">
+                    <div class="pill">واجهة عربية حديثة</div>
+                    <div class="pill">تصدير PDF / Excel / TXT</div>
                 </div>
             </div>
         </div>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h2>منصة تعليمية متكاملة للتواصل مع الطلاب</h2>
-                <p>تقديم تجربة تعليمية تفاعلية تجمع بين الطلاب والمعلمين في بيئة تعاونية متطورة</p>
-                <div class="hero-buttons">
-                    <a href="register.html" class="btn btn-primary">ابدأ التعلم الآن</a>
-                    <a href="#features" class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">استكشف المنصة</a>
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-grid">
+                    <div>
+                        <p class="eyebrow">لوحة قيادة سلسة وعصرية</p>
+                        <h2>تسجيل حضور وغياب الطلبة بواجهة أنيقة ومرتبة</h2>
+                        <p class="lead">اختَر المادة والقسم، سجّل حضور الطلبة مع الملاحظات، وصدّر التقارير مباشرة. إدارة الطلبة والمواد والأقسام تتم بخطوات قليلة وواضحة.</p>
+                        <div class="hero-actions">
+                            <a class="btn primary" href="#attendance">ابدأ التسجيل الآن</a>
+                            <a class="btn ghost" href="#students">إدارة الطلبة</a>
+                        </div>
+                    </div>
+                    <div class="hero-card">
+                        <div class="badge">تجربة حديثة</div>
+                        <h3>كل ما تحتاجه في صفحة واحدة</h3>
+                        <ul>
+                            <li>تسجيل الحضور والغياب مع الملاحظات</li>
+                            <li>حفظ وتصدير PDF بسهولة</li>
+                            <li>إدارة الطلبة مع تصدير Excel / TXT</li>
+                            <li>إدارة المواد والأقسام بإضافة وحذف سلس</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-title">
-                <h2>مميزات منصتنا التعليمية</h2>
-                <p>نقدم مجموعة متكاملة من الأدوات لتحسين تجربة التعليم والتعلم</p>
-            </div>
-            
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="feature-icon">💬</div>
-                    <h3>غرف الحوار التفاعلية</h3>
-                    <p>تواصل مباشر بين الطلاب والمعلمين عبر غرف حوار تفاعلية منظمة حسب المواد الدراسية</p>
+        <section id="attendance" class="panel">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">الخطوة الأولى</p>
+                        <h3>تسجيل الحضور والغياب</h3>
+                        <p class="section-desc">اختر المادة والقسم، ثم سجّل حضور الطلبة مع إمكانية تدوين ملاحظة لكل طالب.</p>
+                    </div>
+                    <div class="actions-inline">
+                        <button class="btn secondary" id="saveAttendance">حفظ الحضور</button>
+                        <button class="btn outline" id="exportPdf" disabled>تصدير PDF</button>
+                    </div>
                 </div>
-                
-                <div class="card">
-                    <div class="feature-icon">📹</div>
-                    <h3>فصول افتراضية</h3>
-                    <p>انضم إلى فصول افتراضية حية مع سبورة تفاعلية ومشاركة الشاشة والتسجيلات</p>
-                </div>
-                
-                <div class="card">
-                    <div class="feature-icon">📂</div>
-                    <h3>مكتبة رقمية شاملة</h3>
-                    <p>الوصول إلى مكتبة ضخمة من المصادر التعليمية والمراجع والدروس المسجلة</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>منصة التعليم التفاعلي</h3>
-                    <p>نحو مستقبل تعليمي أفضل من خلال التكنولوجيا والابتكار</p>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="form-grid">
+                            <label>
+                                <span>المادة</span>
+                                <select id="subjectSelect"></select>
+                            </label>
+                            <label>
+                                <span>القسم</span>
+                                <select id="sectionSelect"></select>
+                            </label>
+                        </div>
+                        <div class="info-banner">
+                            <div>
+                                <p class="eyebrow">نصيحة</p>
+                                <p>اختر المادة والقسم لإظهار لائحة الطلبة. يمكن تدوين ملاحظات خاصة بكل طالب.</p>
+                            </div>
+                            <span class="icon">📝</span>
+                        </div>
+                    </div>
+
+                    <div class="card status-card">
+                        <p class="eyebrow">حالة الحفظ</p>
+                        <h4 id="statusTitle">لم يتم الحفظ بعد</h4>
+                        <p id="statusSubtitle">سيتم تفعيل التصدير إلى PDF بعد حفظ الحضور.</p>
+                        <div class="chips" id="statusChips"></div>
+                    </div>
                 </div>
-                
-                <div class="footer-column">
-                    <h3>روابط سريعة</h3>
-                    <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>الدعم</h3>
-                    <ul>
-                        <li><a href="#">الأسئلة الشائعة</a></li>
-                        <li><a href="#">اتصل بنا</a></li>
-                        <li><a href="#">الشروط والأحكام</a></li>
-                        <li><a href="#">سياسة الخصوصية</a></li>
-                    </ul>
+
+                <div class="card">
+                    <div class="table-head">
+                        <div>
+                            <p class="eyebrow">لائحة الطلبة</p>
+                            <h4 id="studentListTitle">الطلبة حسب القسم المحدد</h4>
+                        </div>
+                        <div class="legend">
+                            <span class="pill success">حاضر</span>
+                            <span class="pill danger">غائب</span>
+                            <span class="pill muted">ملاحظات</span>
+                        </div>
+                    </div>
+                    <div class="table" id="studentsTable"></div>
                 </div>
             </div>
-            
-            <div class="copyright">
-                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+        </section>
+
+        <section id="students" class="panel subtle">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">الخطوة الثانية</p>
+                        <h3>إدارة الطلبة</h3>
+                        <p class="section-desc">أضف أو احذف الطلبة، وصدّر لائحة الطلبة كملف Excel أو TXT.</p>
+                    </div>
+                    <div class="actions-inline">
+                        <button class="btn ghost" id="exportCsv">تصدير Excel (CSV)</button>
+                        <button class="btn ghost" id="exportTxt">تصدير TXT</button>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>إضافة طالب جديد</h4>
+                        <div class="form-grid">
+                            <label>
+                                <span>اسم الطالب</span>
+                                <input type="text" id="studentName" placeholder="مثال: سلمى عبد الرحمن">
+                            </label>
+                            <label>
+                                <span>القسم</span>
+                                <select id="studentSection"></select>
+                            </label>
+                        </div>
+                        <button class="btn primary full" id="addStudent">إضافة الطالب</button>
+                        <p class="helper">إضافة الطالب ستظهره مباشرة في لائحة تسجيل الحضور.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="table-head">
+                            <div>
+                                <p class="eyebrow">لائحة الطلبة</p>
+                                <h4>إدارة وحذف</h4>
+                            </div>
+                        </div>
+                        <div class="table" id="studentsManageTable"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="subjects" class="panel">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">الخطوة الثالثة</p>
+                        <h3>إدارة المواد والأقسام</h3>
+                        <p class="section-desc">إضافة أو حذف المواد والأقسام يحدّث القوائم في كل الصفحات.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>المواد</h4>
+                        <div class="form-inline">
+                            <input type="text" id="subjectInput" placeholder="مثال: الفيزياء">
+                            <button class="btn secondary" id="addSubject">إضافة المادة</button>
+                        </div>
+                        <div class="chips editable" id="subjectsChips"></div>
+                    </div>
+
+                    <div class="card">
+                        <h4>الأقسام</h4>
+                        <div class="form-inline">
+                            <input type="text" id="sectionInput" placeholder="مثال: القسم الرابع">
+                            <button class="btn secondary" id="addSection">إضافة القسم</button>
+                        </div>
+                        <div class="chips editable" id="sectionsChips"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container">
+            <p>تصميم عربي معاصر لإدارة حضور الطلبة وتصدير التقارير بسهولة.</p>
+            <div class="footer-meta">
+                <span>واجهة متجاوبة</span>
+                <span>تجربة سلسة</span>
+                <span>ملفات PDF / CSV / TXT</span>
             </div>
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
