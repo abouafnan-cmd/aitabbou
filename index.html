@@ -2,114 +2,96 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التعليم التفاعلي - الرئيسية</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- إعدادات الشاشة للهاتف لمنع التكبير العشوائي وجعله كالتطبيق -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>مدير التلاميذ</title>
+    
+    <!-- ربط ملف التصميم -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- إعدادات تطبيق الهاتف (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50"> <!-- لون الشريط العلوي في الهاتف -->
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- إعدادات مخصصة لهواتف الآيفون (iOS) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="تلاميذي">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
 </head>
 <body>
     <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <span class="logo-icon">📚</span>
-                    <h1>منصة التعليم التفاعلي</h1>
-                </div>
-                
-                <nav>
-                    <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
-                        <li><a href="chat.html">الدردشة</a></li>
-                    </ul>
-                </nav>
-                
-                <div class="user-actions">
-                    <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
-                    <a href="register.html" class="btn btn-primary">انضم إلينا</a>
-                </div>
-            </div>
-        </div>
+        <h1>نظام إدارة وتتبع التلاميذ</h1>
+        <nav>
+            <button onclick="showTab('daily-entry')" class="active" id="btn-daily-entry">التسجيل اليومي</button>
+            <button onclick="showTab('reports')" id="btn-reports">التقارير</button>
+            <button onclick="showTab('settings')" id="btn-settings">إدارة التلاميذ</button>
+        </nav>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h2>منصة تعليمية متكاملة للتواصل مع الطلاب</h2>
-                <p>تقديم تجربة تعليمية تفاعلية تجمع بين الطلاب والمعلمين في بيئة تعاونية متطورة</p>
-                <div class="hero-buttons">
-                    <a href="register.html" class="btn btn-primary">ابدأ التعلم الآن</a>
-                    <a href="#features" class="btn btn-outline" style="color: var(--dark); border-color: var(--dark);">استكشف المنصة</a>
-                </div>
+    <main>
+        <!-- قسم التسجيل اليومي -->
+        <section id="daily-entry" class="tab-content active">
+            <h2>التسجيل اليومي</h2>
+            <div class="controls">
+                <input type="date" id="record-date" required>
+                <select id="class-select" onchange="loadStudentsForEntry()">
+                    <option value="">اختر القسم...</option>
+                </select>
             </div>
-        </div>
-    </section>
+            <div id="students-list-container" style="overflow-x: auto;"> <!-- للسماح بالتمرير الأفقي في الجداول على الهاتف -->
+                <table id="entry-table">
+                    <thead>
+                        <tr>
+                            <th>التلميذ</th>
+                            <th>الحضور</th>
+                            <th>الإعداد القبلي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entry-tbody">
+                        <!-- قائمة التلاميذ ستظهر هنا -->
+                    </tbody>
+                </table>
+                <button class="save-btn" onclick="saveDailyRecords()">حفظ السجل اليومي</button>
+            </div>
+        </section>
 
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-title">
-                <h2>مميزات منصتنا التعليمية</h2>
-                <p>نقدم مجموعة متكاملة من الأدوات لتحسين تجربة التعليم والتعلم</p>
+        <!-- قسم التقارير -->
+        <section id="reports" class="tab-content" style="display: none;">
+            <h2>تقارير التلاميذ</h2>
+            <div class="controls">
+                <select id="report-class-select" onchange="generateReport()">
+                    <option value="">اختر القسم...</option>
+                </select>
             </div>
-            
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="feature-icon">💬</div>
-                    <h3>غرف الحوار التفاعلية</h3>
-                    <p>تواصل مباشر بين الطلاب والمعلمين عبر غرف حوار تفاعلية منظمة حسب المواد الدراسية</p>
-                </div>
-                
-                <div class="card">
-                    <div class="feature-icon">📹</div>
-                    <h3>فصول افتراضية</h3>
-                    <p>انضم إلى فصول افتراضية حية مع سبورة تفاعلية ومشاركة الشاشة والتسجيلات</p>
-                </div>
-                
-                <div class="card">
-                    <div class="feature-icon">📂</div>
-                    <h3>مكتبة رقمية شاملة</h3>
-                    <p>الوصول إلى مكتبة ضخمة من المصادر التعليمية والمراجع والدروس المسجلة</p>
-                </div>
+            <div id="report-container" style="overflow-x: auto;">
+                <!-- التقرير سيظهر هنا -->
             </div>
-        </div>
-    </section>
+        </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>منصة التعليم التفاعلي</h3>
-                    <p>نحو مستقبل تعليمي أفضل من خلال التكنولوجيا والابتكار</p>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>روابط سريعة</h3>
-                    <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="courses.html">الدروس</a></li>
-                        <li><a href="teachers.html">المعلمون</a></li>
-                        <li><a href="exams.html">الاختبارات</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>الدعم</h3>
-                    <ul>
-                        <li><a href="#">الأسئلة الشائعة</a></li>
-                        <li><a href="#">اتصل بنا</a></li>
-                        <li><a href="#">الشروط والأحكام</a></li>
-                        <li><a href="#">سياسة الخصوصية</a></li>
-                    </ul>
-                </div>
+        <!-- قسم الإعدادات -->
+        <section id="settings" class="tab-content" style="display: none;">
+            <h2>إدارة البيانات</h2>
+            <div class="add-student-form">
+                <input type="text" id="new-student-name" placeholder="اسم التلميذ">
+                <select id="settings-class-select"></select>
+                <button onclick="addStudent()">إضافة تلميذ</button>
             </div>
-            
-            <div class="copyright">
-                <p>© 2024 منصة التعليم التفاعلي. جميع الحقوق محفوظة.</p>
+            <hr>
+            <div class="backup-controls">
+                <button onclick="exportData()" style="width: 100%; margin-bottom: 10px;">📥 تحميل البيانات (نسخة احتياطية)</button>
+                <label for="import-file" style="display: block; text-align: center; background: #e74c3c; color: white; padding: 10px; border-radius: 4px; cursor: pointer;">
+                    📤 استعادة البيانات من ملف
+                </label>
+                <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
             </div>
-        </div>
-    </footer>
+        </section>
+    </main>
 
-    <script src="js/script.js"></script>
+    <!-- ربط ملف الجافاسكريبت الرئيسي -->
+    <script src="script.js"></script>
 </body>
 </html>
