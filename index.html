@@ -14,6 +14,8 @@
             --bg: #f4f7f6;
             --text: #333;
             --border: #ddd;
+            --danger: #e74c3c;
+            --telegram: #0088cc;
         }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
@@ -23,12 +25,15 @@
         nav button.active { background: var(--accent); border-color: var(--accent); font-weight: bold;}
         .container { padding: 20px; max-width: 800px; margin: auto; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        select, input[type="date"], input[type="file"], button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
-        select { flex-grow: 1; min-width: 200px;}
-        button.btn-primary { background-color: var(--accent); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        select, input[type="text"], input[type="date"], input[type="file"], button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
+        select, input[type="text"] { flex-grow: 1; min-width: 200px;}
+        button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none;}
+        button.btn-primary { background-color: var(--accent); }
         button.btn-primary:hover { background-color: #219653; }
-        button.btn-whatsapp { background-color: #25D366; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button.btn-download { background-color: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button.btn-danger { background-color: var(--danger); }
+        button.btn-whatsapp { background-color: #25D366; }
+        button.btn-telegram { background-color: var(--telegram); }
+        button.btn-download { background-color: #3498db; }
         .student-row { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
         .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); }
         .options-group { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 8px; border-radius: 5px;}
@@ -36,8 +41,13 @@
         .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer;}
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
-        .management-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
-        .management-card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
+        .manage-list { list-style: none; padding: 0; margin: 0;}
+        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--bg); align-items: center;}
+        #reportDisplay { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; display: none; line-height: 1.8;}
+        #reportDisplay h4 { margin: 0 0 10px 0; color: var(--primary); }
+        #reportDisplay ul { margin: 0 0 15px 0; padding-right: 20px;}
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -67,33 +77,61 @@
     </div>
 
     <div id="reports" class="section">
-        <div class="management-card">
-            <h3>استخراج تقرير حصة</h3>
+        <div class="card">
+            <h3>استخراج التقرير اليومي</h3>
             <div class="controls">
-                <input type="date" id="reportDate">
-                <select id="reportClassSelect">
+                <input type="date" id="reportDate" onchange="viewReport()">
+                <select id="reportClassSelect" onchange="viewReport()">
                     <option value="">-- اختر القسم --</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                <button class="btn-whatsapp" onclick="generateReport('whatsapp')">📱 إرسال عبر واتساب</button>
-                <button class="btn-download" onclick="generateReport('download')">⬇️ تحميل كملف نصي</button>
+            
+            <div id="reportDisplay"></div>
+
+            <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                <button class="btn-whatsapp" onclick="shareReport('whatsapp')">📱 واتساب</button>
+                <button class="btn-telegram" onclick="shareReport('telegram')">✈️ تلغرام</button>
+                <button class="btn-download" onclick="shareReport('download')">⬇️ تحميل نصي</button>
             </div>
         </div>
     </div>
 
     <div id="management" class="section">
-        <div class="management-card">
-            <h3>📥 استيراد لائحة تلاميذ (ملف txt)</h3>
-            <div class="controls" style="flex-direction: column; align-items: stretch;">
-                <select id="manageClassSelect"></select>
-                <input type="file" id="fileInput" accept=".txt">
-                <button class="btn-primary" onclick="importStudents()">استيراد وحفظ اللائحة</button>
+        <div class="card">
+            <h3>📂 إدارة الأقسام</h3>
+            <div class="controls">
+                <input type="text" id="newClassName" placeholder="اسم القسم الجديد (مثال: الثانية باك 1)">
+                <button class="btn-primary" onclick="addClass()">➕ إضافة قسم</button>
             </div>
-            <ul style="font-size: 0.9rem; color: #555; line-height: 1.6;">
-                <li>يجب أن يحتوي الملف على اسم كل تلميذ في سطر مستقل.</li>
-                <li>استيراد ملف جديد لنفس القسم سيقوم بتحديث اللائحة السابقة.</li>
-            </ul>
+            <div class="controls" style="background: #fff5f5; border: 1px solid #ffeeba;">
+                <select id="manageClassSelect" onchange="renderStudentManagement()">
+                    <option value="">-- اختر القسم للإدارة --</option>
+                </select>
+                <button class="btn-danger" onclick="deleteClass()">🗑️ حذف القسم بالكامل</button>
+            </div>
+        </div>
+
+        <div class="card" id="studentManagementArea" style="display:none;">
+            <h3>👥 إدارة تلاميذ القسم المختار</h3>
+            
+            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
+                <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
+                <div style="display: flex; gap:10px;">
+                    <input type="file" id="fileInput" accept=".txt" style="flex-grow:1;">
+                    <button class="btn-primary" onclick="importStudents()">استيراد</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong style="display:block; margin-bottom:10px;">➕ إضافة تلميذ واحد:</strong>
+                <div style="display: flex; gap:10px;">
+                    <input type="text" id="newStudentName" placeholder="الاسم الكامل للتلميذ">
+                    <button class="btn-primary" onclick="addStudent()">إضافة</button>
+                </div>
+            </div>
+
+            <strong style="display:block; margin-bottom:10px;">📋 لائحة التلاميذ الحالية:</strong>
+            <ul id="manageStudentList" class="manage-list"></ul>
         </div>
     </div>
 </div>
