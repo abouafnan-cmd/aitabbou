@@ -1,7 +1,7 @@
 // تهيئة البيانات
 const defaultClasses = ["جذع مشترك علوم 5", "جذع مشترك علوم 6", "جذع مشترك علوم 7", "جذع مشترك علوم 8", "الأولى علوم 5", "الأولى علوم 6", "الأولى آداب 3"];
 let db = JSON.parse(localStorage.getItem('schoolDB')) || { classes: defaultClasses, students: {}, records: {} };
-let currentReportText = ""; // متغير لتخزين النص الجاهز للمشاركة
+let currentReportText = ""; 
 
 document.getElementById('recordDate').valueAsDate = new Date();
 document.getElementById('reportDate').valueAsDate = new Date();
@@ -11,7 +11,6 @@ function init() {
     const manageSelect = document.getElementById('manageClassSelect');
     const reportSelect = document.getElementById('reportClassSelect');
     
-    // الاحتفاظ بالقسم المختار حالياً إذا وجد
     const currClass = classSelect.value;
     const currManage = manageSelect.value;
     const currReport = reportSelect.value;
@@ -59,6 +58,8 @@ function loadStudents() {
 
     db.students[selectedClass].forEach((student, index) => {
         let att = "حاضر", prep = "لم ينجز";
+        const studentNumber = index + 1; // الرقم التسلسلي
+
         if (savedData) {
             const studentRecord = savedData.find(s => s.name === student);
             if (studentRecord) { att = studentRecord.attendance; prep = studentRecord.preparation; }
@@ -67,7 +68,10 @@ function loadStudents() {
         const row = document.createElement('div');
         row.className = 'student-row';
         row.innerHTML = `
-            <div class="student-name">${student}</div>
+            <div class="student-name">
+                <span class="student-number">${studentNumber}</span> 
+                ${student}
+            </div>
             <div class="options-group">
                 <strong>الغياب:</strong>
                 <label><input type="radio" name="att_${index}" value="حاضر" ${att === 'حاضر' ? 'checked' : ''}> حاضر</label>
@@ -101,7 +105,12 @@ function saveData() {
         let attendanceValue = document.querySelector(`input[name="att_${index}"]:checked`).value;
         let prepValue = document.querySelector(`input[name="prep_${index}"]:checked`).value;
         
-        classRecord.push({ name: student, attendance: attendanceValue, preparation: prepValue });
+        classRecord.push({ 
+            number: index + 1, // حفظ الرقم التسلسلي
+            name: student, 
+            attendance: attendanceValue, 
+            preparation: prepValue 
+        });
     });
 
     db.records[selectedDate][selectedClass] = classRecord;
@@ -126,10 +135,9 @@ function addClass() {
 function deleteClass() {
     const selClass = document.getElementById('manageClassSelect').value;
     if (!selClass) return;
-    if (confirm(`هل أنت متأكد من حذف قسم "${selClass}" وجميع تلاميذه؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+    if (confirm(`هل أنت متأكد من حذف قسم "${selClass}"؟`)) {
         db.classes = db.classes.filter(c => c !== selClass);
         delete db.students[selClass];
-        // تنظيف السجلات المرتبطة بهذا القسم لتوفير المساحة
         for (let date in db.records) {
             if (db.records[date][selClass]) delete db.records[date][selClass];
         }
@@ -145,10 +153,7 @@ function renderStudentManagement() {
     const area = document.getElementById('studentManagementArea');
     const list = document.getElementById('manageStudentList');
     
-    if (!selClass) {
-        area.style.display = 'none';
-        return;
-    }
+    if (!selClass) { area.style.display = 'none'; return; }
     
     area.style.display = 'block';
     list.innerHTML = '';
@@ -158,7 +163,7 @@ function renderStudentManagement() {
     db.students[selClass].forEach((student, index) => {
         list.innerHTML += `
             <li>
-                <span>${student}</span>
+                <span><span class="student-number">${index + 1}</span> - ${student}</span>
                 <button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteStudent('${selClass}', ${index})">حذف</button>
             </li>
         `;
@@ -223,23 +228,26 @@ function viewReport() {
 
     const records = db.records[date][selClass];
     
-    // تصنيف التلاميذ
-    const prepGood = records.filter(s => s.preparation === "إنجاز جيد" && s.attendance !== "غائب").map(s => s.name);
-    const prepMed = records.filter(s => s.preparation === "إنجاز متوسط" && s.attendance !== "غائب").map(s => s.name);
-    const prepWeak = records.filter(s => s.preparation === "إنجاز ضعيف" && s.attendance !== "غائب").map(s => s.name);
-    const noPrep = records.filter(s => s.preparation === "لم ينجز" && s.attendance !== "غائب").map(s => s.name);
-    const absentees = records.filter(s => s.attendance === "غائب").map(s => s.name);
-    const late = records.filter(s => s.attendance === "متأخر").map(s => s.name);
-
-    // بناء واجهة HTML للعرض في الصفحة
-    let html = `<h4>🗓️ تقرير: ${selClass} (${date})</h4>`;
+    // دالة مساعدة لتنسيق الاسم مع الرقم التسلسلي
+    // (تبحث عن الرقم المحفوظ، وإن لم تجده تبحث عن ترتيبه الحالي في اللائحة لتفادي الأخطاء القديمة)
+    const formatName = s => {
+        const num = s.number || (db.students[selClass].indexOf(s.name) + 1);
+        return `(${num}) ${s.name}`;
+    };
     
+    const prepGood = records.filter(s => s.preparation === "إنجاز جيد" && s.attendance !== "غائب").map(formatName);
+    const prepMed = records.filter(s => s.preparation === "إنجاز متوسط" && s.attendance !== "غائب").map(formatName);
+    const prepWeak = records.filter(s => s.preparation === "إنجاز ضعيف" && s.attendance !== "غائب").map(formatName);
+    const noPrep = records.filter(s => s.preparation === "لم ينجز" && s.attendance !== "غائب").map(formatName);
+    const absentees = records.filter(s => s.attendance === "غائب").map(formatName);
+    const late = records.filter(s => s.attendance === "متأخر").map(formatName);
+
+    let html = `<h4>🗓️ تقرير: ${selClass} (${date})</h4>`;
     html += `<strong>📝 التلاميذ الذين أنجزوا الإعداد القبلي:</strong><ul>`;
     html += `<li><strong>أ- بميزة جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
     html += `<li><strong>ب- بميزة متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
     html += `<li><strong>ج- بميزة ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li>`;
     html += `</ul>`;
-
     html += `<strong>❌ التلاميذ الذين لم ينجزوا الإعداد القبلي (${noPrep.length}):</strong><br> ${noPrep.join('، ') || 'لا يوجد'}<br><br>`;
     html += `<strong>🚫 المتغيبون عن الحصة (${absentees.length}):</strong><br> ${absentees.join('، ') || 'لا يوجد'}<br><br>`;
     html += `<strong>⏳ المتأخرون عن الحصة (${late.length}):</strong><br> ${late.join('، ') || 'لا يوجد'}`;
@@ -248,7 +256,6 @@ function viewReport() {
     display.style.display = 'block';
     actions.style.display = 'flex';
 
-    // بناء النص النظيف للمشاركة والتحميل
     currentReportText = `*تقرير: ${selClass} (${date})*\n\n`;
     currentReportText += `*التلاميذ الذين أنجزوا الإعداد القبلي:*\n`;
     currentReportText += `- بميزة جيد: ${prepGood.join('، ') || '-'}\n`;
@@ -265,9 +272,9 @@ function shareReport(type) {
     if (type === 'whatsapp') {
         window.open(`https://wa.me/?text=${encodeURIComponent(currentReportText)}`, '_blank');
     } else if (type === 'telegram') {
-        window.open(`https://t.me/share/url?url=&text=${encodeURIComponent(currentReportText)}`, '_blank');
+        // إضافة مسافة كـ url وهمي لتجنب تجاهل النص من طرف واجهة تلغرام
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(' ')}&text=${encodeURIComponent(currentReportText)}`, '_blank');
     } else if (type === 'download') {
-        // إضافة شفرة uFEFF (BOM) ليتعرف ويندوز على أن الملف بترميز UTF-8 ويدعم اللغة العربية
         const cleanText = currentReportText.replace(/\*/g, '');
         const blob = new Blob(['\uFEFF' + cleanText], { type: 'text/plain;charset=utf-8' });
         const link = document.createElement('a');
@@ -279,5 +286,4 @@ function shareReport(type) {
     }
 }
 
-// تشغيل التهيئة
 init();
