@@ -17,17 +17,19 @@
             --danger: #e74c3c;
             --telegram: #0088cc;
             --excel: #217346;
+            --log-bg: #e8f4f8;
         }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
         header h1 { margin: 0; font-size: 1.5rem; }
-        nav { display: flex; justify-content: center; background: var(--secondary); padding: 0.5rem; gap: 8px; flex-wrap: wrap;}
-        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.3s;}
+        nav { display: flex; justify-content: center; background: var(--secondary); padding: 0.5rem; gap: 5px; flex-wrap: wrap;}
+        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: 0.3s;}
         nav button.active { background: var(--accent); border-color: var(--accent); font-weight: bold;}
         .container { padding: 20px; max-width: 900px; margin: auto; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
-        select, input[type="text"] { flex-grow: 1; min-width: 200px;}
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], textarea, button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
+        select, input[type="text"], textarea { flex-grow: 1; min-width: 200px;}
+        textarea { resize: vertical; min-height: 80px;}
         button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none;}
         button.btn-primary { background-color: var(--accent); }
         button.btn-danger { background-color: var(--danger); }
@@ -38,9 +40,9 @@
         .student-row { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
         .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px;}
         .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
-        .options-group { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 8px; border-radius: 5px;}
-        .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem;}
-        .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer;}
+        .options-group { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 5px;}
+        .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem; width: 100%;}
+        .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
         
         .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
@@ -56,6 +58,13 @@
         .note-item.positive { background: #f0fdf4; border-color: var(--accent); }
         .manage-list { list-style: none; padding: 0; margin: 0;}
         .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: #f9f9f9; margin-bottom: 5px; border-radius: 4px;}
+        
+        /* تنسيقات دفتر النصوص */
+        .log-entry { background: var(--log-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--primary); position: relative;}
+        .log-entry h4 { margin: 0 0 10px 0; color: var(--primary); }
+        .log-entry ul { margin: 5px 0; padding-right: 20px; }
+        .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -66,11 +75,12 @@
 </header>
 <nav>
     <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
+    <button onclick="switchTab('lessonLogTab')">دفتر النصوص</button>
     <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
-    <button onclick="switchTab('miniExamsTab')">الفروض المصغرة</button>
+    <button onclick="switchTab('miniExamsTab')">الفروض</button>
     <button onclick="switchTab('gradesTab')">المراقبة المستمرة</button>
-    <button onclick="switchTab('reports')">التقارير اليومية</button>
-    <button onclick="switchTab('management')">إدارة الأقسام</button>
+    <button onclick="switchTab('reports')">التقارير</button>
+    <button onclick="switchTab('management')">الإدارة</button>
 </nav>
 
 <div class="container">
@@ -78,9 +88,89 @@
         <div class="controls">
             <input type="date" id="recordDate" onchange="loadStudents()">
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
-            <button class="btn-primary" onclick="saveData()">💾 حفظ البيانات</button>
+            <button class="btn-primary" onclick="saveData()">💾 حفظ الغياب</button>
         </div>
         <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+    </div>
+
+    <div id="lessonLogTab" class="section">
+        <div class="controls">
+            <input type="date" id="lessonDate" onchange="viewLessonLog()">
+            <select id="lessonClassSelect" onchange="viewLessonLog()"><option value="">-- اختر القسم --</option></select>
+        </div>
+        
+        <div class="card">
+            <h3>📝 تدوين حصة جديدة</h3>
+            <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+                <strong style="white-space: nowrap;">المكون:</strong>
+                <select id="compSelect" onchange="toggleCompFields()">
+                    <option value="">-- اختر المكون المدرّس --</option>
+                    <option value="النصوص">النصوص</option>
+                    <option value="الدرس اللغوي">الدرس اللغوي</option>
+                    <option value="التعبير والإنشاء">التعبير والإنشاء</option>
+                    <option value="المؤلفات">المؤلفات</option>
+                </select>
+            </div>
+
+            <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
+                <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
+                <div class="options-group">
+                    <strong>الخطوات المنجزة:</strong>
+                    <label><input type="checkbox" name="texts_steps" value="تقديم"> تقديم</label>
+                    <label><input type="checkbox" name="texts_steps" value="ملاحظة النص وصياغة الفرضية"> ملاحظة النص وصياغة الفرضية</label>
+                    <label><input type="checkbox" name="texts_steps" value="فهم النص"> فهم النص</label>
+                    <label><input type="checkbox" name="texts_steps" value="تقويم مرحلي"> تقويم مرحلي</label>
+                    <label><input type="checkbox" name="texts_steps" value="خلاصة تركيبية"> خلاصة تركيبية</label>
+                    <label><input type="checkbox" name="texts_steps" value="تقويم ختامي"> تقويم ختامي</label>
+                </div>
+                <div class="options-group" style="margin-top: 10px; background: #e8f4f8;">
+                    <strong>🔍 تحليل النص (اختر العناصر المنجزة):</strong>
+                    <label><input type="checkbox" name="texts_analysis" value="الحقول الدلالية"> الحقول الدلالية</label>
+                    <label><input type="checkbox" name="texts_analysis" value="أساليب التفسير"> أساليب التفسير</label>
+                    <label><input type="checkbox" name="texts_analysis" value="أساليب الحجاج"> أساليب الحجاج</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الأسلوب التقريري"> الأسلوب التقريري</label>
+                    <label><input type="checkbox" name="texts_analysis" value="البناء الحجاجي"> البناء الحجاجي</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الشخصيات وملامحها"> الشخصيات وملامحها</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الرؤية السردية"> الرؤية السردية</label>
+                    <label><input type="checkbox" name="texts_analysis" value="البنية العاملية"> البنية العاملية</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الزمان والمكان"> الزمان والمكان</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الصور الشعرية"> الصور الشعرية</label>
+                    <label><input type="checkbox" name="texts_analysis" value="البنية الإيقاعية"> البنية الإيقاعية</label>
+                    <label><input type="checkbox" name="texts_analysis" value="الوصف ووظيفته"> الوصف ووظيفته</label>
+                </div>
+            </div>
+
+            <div id="comp_lang" style="display:none; animation: fadeIn 0.3s;">
+                <input type="text" id="lang_title" placeholder="الظاهرة اللغوية المدروسة" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div id="comp_expr" style="display:none; animation: fadeIn 0.3s;">
+                <input type="text" id="expr_title" placeholder="عنوان المهارة" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
+                <div class="options-group">
+                    <strong>النشاط المنجز:</strong>
+                    <label><input type="checkbox" name="expr_steps" value="أنشطة الاكتساب"> أنشطة الاكتساب</label>
+                    <label><input type="checkbox" name="expr_steps" value="أنشطة التطبيق"> أنشطة التطبيق</label>
+                    <label><input type="checkbox" name="expr_steps" value="أنشطة الإنتاج والتقويم"> أنشطة الإنتاج والتقويم</label>
+                </div>
+            </div>
+
+            <div id="comp_lit" style="display:none; animation: fadeIn 0.3s;">
+                <div class="options-group" style="margin-bottom: 10px;">
+                    <strong>القراءة المنجزة:</strong>
+                    <label><input type="checkbox" name="lit_steps" value="القراءة التوجيهية"> القراءة التوجيهية</label>
+                    <label><input type="checkbox" name="lit_steps" value="القراءة التحليلية"> القراءة التحليلية</label>
+                    <label><input type="checkbox" name="lit_steps" value="القراءة التركيبية"> القراءة التركيبية</label>
+                </div>
+                <textarea id="lit_content" placeholder="المحتوى المنجز (اختياري) تفاصيل حول الفصول أو القضايا المعالجة..." style="width: 100%; box-sizing: border-box;"></textarea>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 15px; width: 100%;" onclick="saveLessonLog()">📥 حفظ في دفتر النصوص</button>
+        </div>
+
+        <div class="card" id="lessonDisplayArea" style="display:none;">
+            <h3>📖 المنجز في هذا اليوم</h3>
+            <div id="lessonLogDisplay"></div>
+        </div>
     </div>
 
     <div id="miniExamsTab" class="section">
@@ -117,10 +207,6 @@
             <div id="noteHistoryArea" style="display:none; margin-top:20px;">
                 <h3>أرشيف ملاحظات التلميذ</h3>
                 <div id="noteHistory"></div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn-whatsapp" onclick="shareNotes('whatsapp')">📱 واتساب</button>
-                    <button class="btn-telegram" onclick="shareNotes('telegram')">✈️ تلغرام</button>
-                </div>
             </div>
         </div>
     </div>
@@ -131,14 +217,12 @@
             <select id="gradesClassSelect" onchange="loadGrades()"><option value="">-- اختر القسم --</option></select>
             <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
         </div>
-        
         <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <strong style="width: 100%;">تصدير اللائحة:</strong>
             <button class="btn-whatsapp" onclick="shareGrades('whatsapp')">📱 واتساب</button>
             <button class="btn-telegram" onclick="shareGrades('telegram')">✈️ تلغرام</button>
             <button class="btn-excel" onclick="shareGrades('excel')">📊 تصدير Excel (CSV)</button>
         </div>
-
         <div id="gradesList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
@@ -173,7 +257,6 @@
 
         <div class="card" id="studentManagementArea" style="display:none;">
             <h3>👥 إدارة تلاميذ القسم المختار</h3>
-            
             <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
                 <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
                 <div style="display: flex; gap:10px;">
@@ -181,7 +264,6 @@
                     <button class="btn-primary" onclick="importStudents()">استيراد</button>
                 </div>
             </div>
-
             <div style="margin-bottom: 20px;">
                 <strong style="display:block; margin-bottom:10px;">➕ إضافة تلميذ واحد:</strong>
                 <div style="display: flex; gap:10px;">
@@ -189,7 +271,6 @@
                     <button class="btn-primary" onclick="addStudent()">إضافة</button>
                 </div>
             </div>
-
             <strong style="display:block; margin-bottom:10px;">📋 لائحة التلاميذ الحالية:</strong>
             <ul id="manageStudentList" class="manage-list"></ul>
         </div>
