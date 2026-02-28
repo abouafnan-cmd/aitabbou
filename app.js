@@ -45,7 +45,6 @@ dbRef.on('value', (snapshot) => {
             refreshCurrentView();
             isInitialLoad = false;
         } else {
-            // تحديث الشاشة بدون إعادة اختيار التلميذ لكي لا تختفي البيانات
             refreshCurrentView();
         }
     } else {
@@ -75,9 +74,9 @@ function refreshCurrentView() {
     if(activeSection === 'tracking') loadStudents();
     else if(activeSection === 'lessonLogTab') viewLessonLog();
     else if(activeSection === 'notesTab') {
-        // إذا كان التلميذ محدداً مسبقاً، نكتفي بتحديث أرشيفه دون إعادة تحميل القائمة كلها
         const student = document.getElementById('noteStudentSelect').value;
         if(student) loadStudentHistory();
+        else if (document.getElementById('classNotesArea').style.display === 'block') viewClassNotes();
     }
     else if(activeSection === 'miniExamsTab') loadMiniExams();
     else if(activeSection === 'gradesTab') loadGrades();
@@ -111,53 +110,327 @@ function switchTab(tabId) {
     event.target.classList.add('active');
 }
 
-/* ================== الملاحظات الخاصة (تم الإصلاح والتطوير) ================== */
-function loadNoteStudents() {
-    const cls = document.getElementById('noteClassSelect').value;
-    const studentSelect = document.getElementById('noteStudentSelect');
-    
-    // حفظ اسم التلميذ الحالي لتجنب تصفير القائمة عند التحديث السحابي
-    const currentStudent = studentSelect.value; 
+/* ================== دفتر النصوص المحدث ================== */
+function toggleCompFields() {
+    const comp = document.getElementById('compSelect').value;
+    document.getElementById('comp_texts').style.display = comp === 'النصوص' ? 'block' : 'none';
+    document.getElementById('comp_lang').style.display = comp === 'الدرس اللغوي' ? 'block' : 'none';
+    document.getElementById('comp_expr').style.display = comp === 'التعبير والإنشاء' ? 'block' : 'none';
+    document.getElementById('comp_lit').style.display = comp === 'المؤلفات' ? 'block' : 'none';
+}
 
-    document.getElementById('noteCheckboxesArea').style.display = 'none';
-    document.getElementById('noteHistoryArea').style.display = 'none';
-    document.getElementById('classNotesArea').style.display = 'none';
-    
-    if (!cls || !db.students[cls]) { studentSelect.style.display = 'none'; return; }
-    
-    studentSelect.innerHTML = '<option value="">-- اختر التلميذ --</option>';
-    db.students[cls].forEach((s, i) => studentSelect.innerHTML += `<option value="${s}">${i+1} - ${s}</option>`);
-    studentSelect.style.display = 'block';
+function saveLessonLog() {
+    const date = document.getElementById('lessonDate').value;
+    const cls = document.getElementById('lessonClassSelect').value;
+    const comp = document.getElementById('compSelect').value;
+    if (!date || !cls || !comp) return alert("المرجو اختيار التاريخ والقسم والمكون.");
 
-    // إعادة اختيار التلميذ إذا كان لا يزال في نفس القسم
-    if(currentStudent && db.students[cls].includes(currentStudent)) {
-        studentSelect.value = currentStudent;
+    let entry = { id: Date.now(), component: comp, details: {} };
+    
+    if (comp === 'النصوص') {
+        entry.details.title = document.getElementById('texts_title').value;
+        entry.details.session1 = Array.from(document.querySelectorAll('input[name="texts_s1"]:checked')).map(cb => cb.value);
+        entry.details.analysis = Array.from(document.querySelectorAll('input[name="texts_s2_analysis"]:checked')).map(cb => cb.value);
+        entry.details.session2_end = Array.from(document.querySelectorAll('input[name="texts_s2_end"]:checked')).map(cb => cb.value);
+    } else if (comp === 'الدرس اللغوي') {
+        entry.details.title = document.getElementById('lang_title').value;
+    } else if (comp === 'التعبير والإنشاء') {
+        entry.details.title = document.getElementById('expr_title').value;
+        entry.details.steps = Array.from(document.querySelectorAll('input[name="expr_steps"]:checked')).map(cb => cb.value);
+    } else if (comp === 'المؤلفات') {
+        entry.details.steps = Array.from(document.querySelectorAll('input[name="lit_steps"]:checked')).map(cb => cb.value);
+        entry.details.content = document.getElementById('lit_content').value;
+    }
+
+    if (!db.lessonLog[date]) db.lessonLog[date] = {};
+    if (!db.lessonLog[date][cls]) db.lessonLog[date][cls] = [];
+    db.lessonLog[date][cls].push(entry);
+    
+    document.querySelectorAll('#lessonLogTab input[type="text"], #lessonLogTab textarea').forEach(el => el.value = '');
+    document.querySelectorAll('#lessonLogTab input[type="checkbox"]').forEach(el => el.checked = false);
+    document.getElementById('compSelect').value = '';
+    toggleCompFields();
+    
+    saveToCloud(true);
+    viewLessonLog();
+}
+
+function viewLessonLog() {
+    const date = document.getElementById('lessonDate').value;
+    const cls = document.getElementById('lessonClassSelect').value;
+    const area = document.getElementById('lessonDisplayArea');
+    const display = document.getElementById('lessonLogDisplay');
+    
+    if (!date || !cls || !db.lessonLog[date] || !db.lessonLog[date][cls] || db.lessonLog[date][cls].length === 0) { area.style.display = 'none'; return; }
+
+    const logs = db.lessonLog[date][cls];
+    let html = '';
+    logs.forEach(log => {
+        html += `<div class="log-entry">`;
+        html += `<button class="delete-log" onclick="deleteLessonLog(${log.id})">حذف</button>`;
+        html += `<h4>📘 المكون: ${log.component}</h4>`;
+        
+        if (log.component === 'النصوص') {
+            if(log.details.title) html += `<strong>العنوان:</strong> ${log.details.title}<br>`;
+            
+            // الدعم التراجعي للسجلات القديمة إن وجدت
+            if(log.details.steps && log.details.steps.length > 0) html += `<strong>الخطوات:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
+            
+            // الهيكلة الجديدة
+            if(log.details.session1 && log.details.session1.length > 0) html += `<strong>الحصة الأولى:</strong><ul><li>${log.details.session1.join('</li><li>')}</li></ul>`;
+            if(log.details.analysis && log.details.analysis.length > 0) html += `<strong>الحصة الثانية (تحليل):</strong><ul><li>${log.details.analysis.join('</li><li>')}</li></ul>`;
+            if(log.details.session2_end && log.details.session2_end.length > 0) html += `<strong>خواتيم:</strong><ul><li>${log.details.session2_end.join('</li><li>')}</li></ul>`;
+            
+        } else if (log.component === 'الدرس اللغوي') {
+            html += `<strong>الظاهرة اللغوية:</strong> ${log.details.title || 'لم يحدد'}<br>`;
+        } else if (log.component === 'التعبير والإنشاء') {
+            if(log.details.title) html += `<strong>المهارة:</strong> ${log.details.title}<br>`;
+            if(log.details.steps && log.details.steps.length > 0) html += `<strong>النشاط:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
+        } else if (log.component === 'المؤلفات') {
+            if(log.details.steps && log.details.steps.length > 0) html += `<strong>القراءة:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
+            if(log.details.content) html += `<strong>المحتوى المنجز:</strong><p style="margin-top:5px; background:white; padding:10px; border-radius:4px;">${log.details.content}</p>`;
+        }
+        html += `</div>`;
+    });
+    display.innerHTML = html;
+    area.style.display = 'block';
+}
+
+function deleteLessonLog(id) {
+    if(!confirm("هل أنت متأكد من حذف هذا السجل؟")) return;
+    const date = document.getElementById('lessonDate').value;
+    const cls = document.getElementById('lessonClassSelect').value;
+    db.lessonLog[date][cls] = db.lessonLog[date][cls].filter(log => log.id !== id);
+    saveToCloud(false);
+    viewLessonLog();
+}
+
+/* ================== نظام التقارير الشامل المحدث ================== */
+function viewReport() {
+    const reportType = document.getElementById('reportTypeSelect').value;
+    const date = document.getElementById('reportDate').value;
+    const selClass = document.getElementById('reportClassSelect').value;
+    const display = document.getElementById('reportDisplay');
+    const actions = document.getElementById('reportActions');
+    const dateInput = document.getElementById('reportDate');
+
+    if (!selClass) { display.style.display = 'none'; actions.style.display = 'none'; return; }
+
+    // إخفاء التاريخ إذا كان التقرير تراكمياً
+    dateInput.style.display = (reportType === 'tracking') ? 'block' : 'none';
+    
+    display.innerHTML = '';
+    currentReportText = '';
+
+    if (reportType === 'tracking') {
+        if (!date || !db.records[date] || !db.records[date][selClass]) { 
+            display.innerHTML = '<p style="text-align:center; color:red;">لا توجد بيانات غياب/إعداد محفوظة لهذا التاريخ.</p>';
+            display.style.display = 'block'; actions.style.display = 'none'; return; 
+        }
+        
+        const records = db.records[date][selClass];
+        const formatName = s => `(${s.number || (db.students[selClass].indexOf(s.name) + 1)}) ${s.name}`;
+        const prepGood = records.filter(s => s.preparation === "إنجاز جيد" && s.attendance !== "غائب").map(formatName);
+        const prepMed = records.filter(s => s.preparation === "إنجاز متوسط" && s.attendance !== "غائب").map(formatName);
+        const prepWeak = records.filter(s => s.preparation === "إنجاز ضعيف" && s.attendance !== "غائب").map(formatName);
+        const noPrep = records.filter(s => s.preparation === "لم ينجز" && s.attendance !== "غائب").map(formatName);
+        const absentees = records.filter(s => s.attendance === "غائب").map(formatName);
+        const late = records.filter(s => s.attendance === "متأخر").map(formatName);
+
+        let html = `<h4>🗓️ تتبع الحضور والإعداد: ${selClass} (${date})</h4><ul>`;
+        html += `<li><strong>بميزة جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
+        html += `<li><strong>بميزة متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
+        html += `<li><strong>بميزة ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li></ul>`;
+        html += `<strong>❌ لم ينجزوا (${noPrep.length}):</strong><br> ${noPrep.join('، ') || '-'}<br><br>`;
+        html += `<strong>🚫 المتغيبون (${absentees.length}):</strong><br> ${absentees.join('، ') || '-'}<br><br>`;
+        html += `<strong>⏳ المتأخرون (${late.length}):</strong><br> ${late.join('، ') || '-'}`;
+        
+        display.innerHTML = html;
+        currentReportText = `*تقرير الإعداد والحضور: ${selClass} (${date})*\n\n*المنجزون للإعداد:*\n- جيد: ${prepGood.join('، ') || '-'}\n- متوسط: ${prepMed.join('، ') || '-'}\n- ضعيف: ${prepWeak.join('، ') || '-'}\n\n*لم ينجزوا:*\n${noPrep.join('، ') || 'لا يوجد'}\n\n*الغياب:*\n${absentees.join('، ') || 'لا يوجد'}\n\n*التأخر:*\n${late.join('، ') || 'لا يوجد'}`;
+        display.style.display = 'block'; actions.style.display = 'flex';
+    } 
+    
+    else if (reportType === 'notes') {
+        if (!db.notes[selClass] || Object.keys(db.notes[selClass]).length === 0) {
+            display.innerHTML = '<p style="text-align:center;">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
+        } else {
+            let html = `<h4>📝 تقرير الملاحظات الخاصة: ${selClass}</h4>`;
+            let txt = `*تقرير الملاحظات الخاصة*\n*القسم:* ${selClass}\n\n`;
+            for (let student in db.notes[selClass]) {
+                let studentHtml = `<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;"><strong>👤 ${student}:</strong><ul>`;
+                let hasNotes = false;
+                Object.keys(db.notes[selClass][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
+                    const notes = db.notes[selClass][student][d];
+                    if(notes.length > 0) {
+                        hasNotes = true;
+                        studentHtml += `<li><em>${d}:</em> ${notes.join('، ')}</li>`;
+                        txt += `👤 *${student}* (${d}):\n- ${notes.join('\n- ')}\n`;
+                    }
+                });
+                studentHtml += `</ul></div>`;
+                if(hasNotes) { html += studentHtml; txt += '\n'; }
+            }
+            display.innerHTML = html;
+            currentReportText = txt;
+        }
+        display.style.display = 'block'; actions.style.display = 'flex';
+    }
+    
+    else if (reportType === 'lessons') {
+        let allLogs = [];
+        for(let d in db.lessonLog) {
+            if(db.lessonLog[d][selClass]) {
+                db.lessonLog[d][selClass].forEach(log => allLogs.push({ date: d, ...log }));
+            }
+        }
+        
+        if (allLogs.length === 0) {
+             display.innerHTML = '<p style="text-align:center;">لا توجد دروس مسجلة لهذا القسم.</p>';
+        } else {
+            allLogs.sort((a,b) => new Date(b.date) - new Date(a.date)); // الأحدث أولاً
+            
+            let html = `<h4>📘 دفتر النصوص التراكمي: ${selClass}</h4>`;
+            let txt = `*دفتر النصوص التراكمي*\n*القسم:* ${selClass}\n\n`;
+
+            allLogs.forEach(log => {
+                html += `<div style="border-right: 4px solid var(--primary); background:#f9f9f9; padding: 10px; margin-bottom: 10px;">`;
+                html += `<strong style="color:var(--primary);">📅 ${log.date} | ${log.component}</strong><br>`;
+                txt += `📅 *${log.date}* | ${log.component}\n`;
+
+                if (log.component === 'النصوص') {
+                    if(log.details.title) { html += `<em>العنوان:</em> ${log.details.title}<br>`; txt += `العنوان: ${log.details.title}\n`; }
+                    if(log.details.session1 && log.details.session1.length > 0) { html += `<em>الحصة 1:</em> ${log.details.session1.join('، ')}<br>`; txt += `الحصة 1: ${log.details.session1.join('، ')}\n`; }
+                    if(log.details.analysis && log.details.analysis.length > 0) { html += `<em>الحصة 2:</em> ${log.details.analysis.join('، ')}<br>`; txt += `الحصة 2: ${log.details.analysis.join('، ')}\n`; }
+                    if(log.details.session2_end && log.details.session2_end.length > 0) { html += `<em>خواتيم:</em> ${log.details.session2_end.join('، ')}<br>`; txt += `خواتيم: ${log.details.session2_end.join('، ')}\n`; }
+                    if(log.details.steps && log.details.steps.length > 0) { html += `<em>الخطوات:</em> ${log.details.steps.join('، ')}<br>`; txt += `الخطوات: ${log.details.steps.join('، ')}\n`; } // للقديم
+                } else if (log.component === 'الدرس اللغوي') {
+                    html += `<em>الظاهرة اللغوية:</em> ${log.details.title || 'لم يحدد'}<br>`; txt += `الظاهرة اللغوية: ${log.details.title || 'لم يحدد'}\n`;
+                } else if (log.component === 'التعبير والإنشاء') {
+                    if(log.details.title) { html += `<em>المهارة:</em> ${log.details.title}<br>`; txt += `المهارة: ${log.details.title}\n`; }
+                    if(log.details.steps && log.details.steps.length > 0) { html += `<em>النشاط:</em> ${log.details.steps.join('، ')}<br>`; txt += `النشاط: ${log.details.steps.join('، ')}\n`; }
+                } else if (log.component === 'المؤلفات') {
+                    if(log.details.steps && log.details.steps.length > 0) { html += `<em>القراءة:</em> ${log.details.steps.join('، ')}<br>`; txt += `القراءة: ${log.details.steps.join('، ')}\n`; }
+                    if(log.details.content) { html += `<em>المحتوى:</em> ${log.details.content}<br>`; txt += `المحتوى: ${log.details.content}\n`; }
+                }
+                html += `</div>`;
+                txt += `-------------------\n`;
+            });
+            display.innerHTML = html;
+            currentReportText = txt;
+        }
+        display.style.display = 'block'; actions.style.display = 'flex';
     }
 }
 
+function shareReport(type) {
+    if (!currentReportText) return;
+    if (type === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(currentReportText)}`, '_blank');
+    else if (type === 'telegram') window.open(`https://t.me/share/url?url=${encodeURIComponent(' ')}&text=${encodeURIComponent(currentReportText)}`, '_blank');
+    else if (type === 'download') {
+        const cleanText = currentReportText.replace(/\*/g, '');
+        const blob = new Blob(['\uFEFF' + cleanText], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+        const repType = document.getElementById('reportTypeSelect').options[document.getElementById('reportTypeSelect').selectedIndex].text;
+        link.download = `تقرير_${repType}_${document.getElementById('reportClassSelect').value}.txt`; link.click();
+    }
+}
+
+/* ================== باقي الدوال الاعتيادية المساعدة ================== */
+function loadStudents() {
+    const date = document.getElementById('recordDate').value;
+    const cls = document.getElementById('classSelect').value;
+    const list = document.getElementById('studentsList');
+    list.innerHTML = '';
+    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align:center;">لا يوجد تلاميذ. يرجى إضافتهم من إدارة الأقسام.</p>';
+    const saved = (db.records[date] && db.records[date][cls]) ? db.records[date][cls] : null;
+    db.students[cls].forEach((student, index) => {
+        let att = "حاضر", prep = "لم ينجز";
+        if (saved) { const rec = saved.find(s => s.name === student); if (rec) { att = rec.attendance; prep = rec.preparation; } }
+        list.innerHTML += `<div class="student-row">
+            <div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
+            <div class="options-group"><strong>الغياب:</strong>
+                <label><input type="radio" name="att_${index}" value="حاضر" ${att==='حاضر'?'checked':''}> حاضر</label>
+                <label><input type="radio" name="att_${index}" value="متأخر" ${att==='متأخر'?'checked':''}> متأخر</label>
+                <label><input type="radio" name="att_${index}" value="غائب" ${att==='غائب'?'checked':''}> غائب</label>
+            </div>
+            <div class="options-group"><strong>الإعداد:</strong>
+                <label><input type="radio" name="prep_${index}" value="لم ينجز" ${prep==='لم ينجز'?'checked':''}> لم ينجز</label>
+                <label><input type="radio" name="prep_${index}" value="إنجاز ضعيف" ${prep==='إنجاز ضعيف'?'checked':''}> ضعيف</label>
+                <label><input type="radio" name="prep_${index}" value="إنجاز متوسط" ${prep==='إنجاز متوسط'?'checked':''}> متوسط</label>
+                <label><input type="radio" name="prep_${index}" value="إنجاز جيد" ${prep==='إنجاز جيد'?'checked':''}> جيد</label>
+            </div></div>`;
+    });
+}
+function saveData() {
+    const date = document.getElementById('recordDate').value;
+    const cls = document.getElementById('classSelect').value;
+    if (!date || !cls || !db.students[cls]) return alert("المرجو اختيار التاريخ والقسم.");
+    if (!db.records[date]) db.records[date] = {};
+    let rec = [];
+    db.students[cls].forEach((student, i) => { rec.push({ number: i + 1, name: student, attendance: document.querySelector(`input[name="att_${i}"]:checked`).value, preparation: document.querySelector(`input[name="prep_${i}"]:checked`).value }); });
+    db.records[date][cls] = rec;
+    saveToCloud(true);
+}
+function loadMiniExams() {
+    const date = document.getElementById('miniExamsDate').value;
+    const cls = document.getElementById('miniExamsClassSelect').value;
+    const list = document.getElementById('miniExamsList');
+    list.innerHTML = '';
+    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align: center;">المرجو اختيار التاريخ والقسم.</p>';
+    const saved = (db.miniExams[date] && db.miniExams[date][cls]) ? db.miniExams[date][cls] : {};
+    db.students[cls].forEach((student, index) => {
+        const stdData = saved[student] || { type: 'خلاصة تركيبية', grade: '' };
+        list.innerHTML += `<div class="student-row"><div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
+            <div class="options-group" style="display:flex; gap: 10px; flex-wrap: nowrap;">
+                <select id="miniType_${index}" style="flex-grow: 1; padding: 8px;">
+                    <option value="خلاصة تركيبية" ${stdData.type === 'خلاصة تركيبية' ? 'selected' : ''}>خلاصة تركيبية</option>
+                    <option value="موضوع إنشائي" ${stdData.type === 'موضوع إنشائي' ? 'selected' : ''}>موضوع إنشائي</option>
+                    <option value="تطبيقات لغوية" ${stdData.type === 'تطبيقات لغوية' ? 'selected' : ''}>تطبيقات لغوية</option>
+                    <option value="تقويم مرحلي" ${stdData.type === 'تقويم مرحلي' ? 'selected' : ''}>تقويم مرحلي</option>
+                </select>
+                <input type="number" id="miniGrade_${index}" value="${stdData.grade}" min="0" max="20" step="0.25" placeholder="النقطة" style="width: 80px; padding: 8px;">
+            </div></div>`;
+    });
+}
+function saveMiniExams() {
+    const date = document.getElementById('miniExamsDate').value;
+    const cls = document.getElementById('miniExamsClassSelect').value;
+    if (!date || !cls) return alert("المرجو اختيار التاريخ والقسم.");
+    if (!db.miniExams[date]) db.miniExams[date] = {};
+    db.miniExams[date][cls] = {};
+    db.students[cls].forEach((student, index) => { db.miniExams[date][cls][student] = { type: document.getElementById(`miniType_${index}`).value, grade: document.getElementById(`miniGrade_${index}`).value }; });
+    saveToCloud(true);
+}
+
+function loadNoteStudents() {
+    const cls = document.getElementById('noteClassSelect').value;
+    const studentSelect = document.getElementById('noteStudentSelect');
+    const currentStudent = studentSelect.value; 
+    document.getElementById('noteCheckboxesArea').style.display = 'none';
+    document.getElementById('noteHistoryArea').style.display = 'none';
+    document.getElementById('classNotesArea').style.display = 'none';
+    if (!cls || !db.students[cls]) { studentSelect.style.display = 'none'; return; }
+    studentSelect.innerHTML = '<option value="">-- اختر التلميذ --</option>';
+    db.students[cls].forEach((s, i) => studentSelect.innerHTML += `<option value="${s}">${i+1} - ${s}</option>`);
+    studentSelect.style.display = 'block';
+    if(currentStudent && db.students[cls].includes(currentStudent)) studentSelect.value = currentStudent;
+}
 function loadStudentHistory() {
     const date = document.getElementById('noteDate').value;
     const cls = document.getElementById('noteClassSelect').value;
     const student = document.getElementById('noteStudentSelect').value;
     const cbArea = document.getElementById('noteCheckboxesArea');
-    
-    document.getElementById('classNotesArea').style.display = 'none'; // إخفاء أرشيف القسم
-
+    document.getElementById('classNotesArea').style.display = 'none'; 
     if (!student) { cbArea.style.display = 'none'; document.getElementById('noteHistoryArea').style.display = 'none'; return; }
-    
     document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => cb.checked = false);
     if (db.notes[cls] && db.notes[cls][student] && db.notes[cls][student][date]) {
         const todayNotes = db.notes[cls][student][date];
-        document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => {
-            if (todayNotes.includes(cb.value)) cb.checked = true;
-        });
+        document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => { if (todayNotes.includes(cb.value)) cb.checked = true; });
     }
-    
     cbArea.style.display = 'block';
     const histDiv = document.getElementById('noteHistory');
     histDiv.innerHTML = '';
     let hasHistory = false;
-    
     if (db.notes[cls] && db.notes[cls][student]) {
         Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
             const notes = db.notes[cls][student][d];
@@ -168,163 +441,52 @@ function loadStudentHistory() {
             }
         });
     }
-    
     document.getElementById('studentArchiveTitle').innerText = `أرشيف ملاحظات: ${student}`;
     document.getElementById('noteHistoryArea').style.display = hasHistory ? 'block' : 'none';
 }
-
 function saveNotes() {
     const date = document.getElementById('noteDate').value;
     const cls = document.getElementById('noteClassSelect').value;
     const student = document.getElementById('noteStudentSelect').value;
     if (!date || !cls || !student) return alert("المرجو إكمال الاختيارات.");
-    
     const selectedNotes = Array.from(document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]:checked')).map(cb => cb.value);
-    
     if (!db.notes[cls]) db.notes[cls] = {};
     if (!db.notes[cls][student]) db.notes[cls][student] = {};
     db.notes[cls][student][date] = selectedNotes;
-    
     saveToCloud(true);
-    loadStudentHistory(); // تحديث فوري للأرشيف في الشاشة
+    loadStudentHistory(); 
 }
-
-// الدالة الجديدة لإظهار أرشيف القسم بالكامل
 function viewClassNotes() {
     const cls = document.getElementById('noteClassSelect').value;
     const classArea = document.getElementById('classNotesArea');
     const classDiv = document.getElementById('classNotesDisplay');
-    
     if (!cls) return alert("المرجو اختيار القسم أولاً.");
-
     classDiv.innerHTML = '';
     let hasClassNotes = false;
-
     if (db.notes[cls]) {
         for (let student in db.notes[cls]) {
             let studentHtml = `<div style="background: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-right: 4px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1);">`;
             studentHtml += `<h4 style="margin: 0 0 10px 0; color: var(--primary);">👤 ${student}</h4>`;
             let hasStudentNotes = false;
-            
             Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
                 const notes = db.notes[cls][student][d];
                 if (notes.length > 0) {
-                    hasClassNotes = true;
-                    hasStudentNotes = true;
+                    hasClassNotes = true; hasStudentNotes = true;
                     const isPositive = notes.includes("تقديم مشاركة متميزة");
-                    studentHtml += `<div class="note-item ${isPositive ? 'positive' : ''}" style="margin-left: 10px; margin-right: 10px;">
-                        <strong>📅 ${d}</strong><br>- ${notes.join('<br>- ')}
-                    </div>`;
+                    studentHtml += `<div class="note-item ${isPositive ? 'positive' : ''}" style="margin-left: 10px; margin-right: 10px;"><strong>📅 ${d}</strong><br>- ${notes.join('<br>- ')}</div>`;
                 }
             });
             studentHtml += `</div>`;
             if (hasStudentNotes) classDiv.innerHTML += studentHtml;
         }
     }
-
-    if (!hasClassNotes) {
-        classDiv.innerHTML = '<p style="text-align: center; color: #777;">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
-    }
-
+    if (!hasClassNotes) classDiv.innerHTML = '<p style="text-align: center; color: #777;">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
     classArea.style.display = 'block';
-    
-    // إخفاء منطقة عمل التلميذ الفردي للتركيز على القسم
     document.getElementById('noteCheckboxesArea').style.display = 'none';
     document.getElementById('noteHistoryArea').style.display = 'none';
-    document.getElementById('noteStudentSelect').value = ""; // تصفير اختيار التلميذ
+    document.getElementById('noteStudentSelect').value = ""; 
 }
 
-/* ================== تتبع الأداء ================== */
-function loadStudents() {
-    const date = document.getElementById('recordDate').value;
-    const cls = document.getElementById('classSelect').value;
-    const list = document.getElementById('studentsList');
-    list.innerHTML = '';
-    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align:center;">لا يوجد تلاميذ. يرجى إضافتهم من إدارة الأقسام.</p>';
-    const saved = (db.records[date] && db.records[date][cls]) ? db.records[date][cls] : null;
-    db.students[cls].forEach((student, index) => {
-        let att = "حاضر", prep = "لم ينجز";
-        if (saved) {
-            const rec = saved.find(s => s.name === student);
-            if (rec) { att = rec.attendance; prep = rec.preparation; }
-        }
-        list.innerHTML += `
-            <div class="student-row">
-                <div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
-                <div class="options-group">
-                    <strong>الغياب:</strong>
-                    <label><input type="radio" name="att_${index}" value="حاضر" ${att==='حاضر'?'checked':''}> حاضر</label>
-                    <label><input type="radio" name="att_${index}" value="متأخر" ${att==='متأخر'?'checked':''}> متأخر</label>
-                    <label><input type="radio" name="att_${index}" value="غائب" ${att==='غائب'?'checked':''}> غائب</label>
-                </div>
-                <div class="options-group">
-                    <strong>الإعداد:</strong>
-                    <label><input type="radio" name="prep_${index}" value="لم ينجز" ${prep==='لم ينجز'?'checked':''}> لم ينجز</label>
-                    <label><input type="radio" name="prep_${index}" value="إنجاز ضعيف" ${prep==='إنجاز ضعيف'?'checked':''}> ضعيف</label>
-                    <label><input type="radio" name="prep_${index}" value="إنجاز متوسط" ${prep==='إنجاز متوسط'?'checked':''}> متوسط</label>
-                    <label><input type="radio" name="prep_${index}" value="إنجاز جيد" ${prep==='إنجاز جيد'?'checked':''}> جيد</label>
-                </div>
-            </div>`;
-    });
-}
-function saveData() {
-    const date = document.getElementById('recordDate').value;
-    const cls = document.getElementById('classSelect').value;
-    if (!date || !cls || !db.students[cls]) return alert("المرجو اختيار التاريخ والقسم.");
-    if (!db.records[date]) db.records[date] = {};
-    let rec = [];
-    db.students[cls].forEach((student, i) => {
-        rec.push({
-            number: i + 1,
-            name: student,
-            attendance: document.querySelector(`input[name="att_${i}"]:checked`).value,
-            preparation: document.querySelector(`input[name="prep_${i}"]:checked`).value
-        });
-    });
-    db.records[date][cls] = rec;
-    saveToCloud(true);
-}
-
-/* ================== الفروض المصغرة ================== */
-function loadMiniExams() {
-    const date = document.getElementById('miniExamsDate').value;
-    const cls = document.getElementById('miniExamsClassSelect').value;
-    const list = document.getElementById('miniExamsList');
-    list.innerHTML = '';
-    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align: center;">المرجو اختيار التاريخ والقسم.</p>';
-    const saved = (db.miniExams[date] && db.miniExams[date][cls]) ? db.miniExams[date][cls] : {};
-    db.students[cls].forEach((student, index) => {
-        const stdData = saved[student] || { type: 'خلاصة تركيبية', grade: '' };
-        list.innerHTML += `
-            <div class="student-row">
-                <div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
-                <div class="options-group" style="display:flex; gap: 10px; flex-wrap: nowrap;">
-                    <select id="miniType_${index}" style="flex-grow: 1; padding: 8px;">
-                        <option value="خلاصة تركيبية" ${stdData.type === 'خلاصة تركيبية' ? 'selected' : ''}>خلاصة تركيبية</option>
-                        <option value="موضوع إنشائي" ${stdData.type === 'موضوع إنشائي' ? 'selected' : ''}>موضوع إنشائي</option>
-                        <option value="تطبيقات لغوية" ${stdData.type === 'تطبيقات لغوية' ? 'selected' : ''}>تطبيقات لغوية</option>
-                        <option value="تقويم مرحلي" ${stdData.type === 'تقويم مرحلي' ? 'selected' : ''}>تقويم مرحلي</option>
-                    </select>
-                    <input type="number" id="miniGrade_${index}" value="${stdData.grade}" min="0" max="20" step="0.25" placeholder="النقطة" style="width: 80px; padding: 8px;">
-                </div>
-            </div>`;
-    });
-}
-function saveMiniExams() {
-    const date = document.getElementById('miniExamsDate').value;
-    const cls = document.getElementById('miniExamsClassSelect').value;
-    if (!date || !cls) return alert("المرجو اختيار التاريخ والقسم.");
-    if (!db.miniExams[date]) db.miniExams[date] = {};
-    db.miniExams[date][cls] = {};
-    db.students[cls].forEach((student, index) => {
-        const type = document.getElementById(`miniType_${index}`).value;
-        const grade = document.getElementById(`miniGrade_${index}`).value;
-        db.miniExams[date][cls][student] = { type, grade };
-    });
-    saveToCloud(true);
-}
-
-/* ================== المراقبة المستمرة ================== */
 function loadGrades() {
     const date = document.getElementById('gradesDate').value;
     const cls = document.getElementById('gradesClassSelect').value;
@@ -339,16 +501,13 @@ function loadGrades() {
         let bgStyle = "background: var(--secondary);";
         let numAvg = parseFloat(stdData.avg);
         if (!isNaN(numAvg)) bgStyle = numAvg < 10 ? "background: var(--danger); color: white;" : "background: var(--accent); color: white;";
-        list.innerHTML += `
-            <div class="student-row">
-                <div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
-                <div class="grades-grid">
-                    <div><label>الفرض الأول</label><input type="number" id="e1_${index}" value="${stdData.e1}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
-                    <div><label>الفرض الثاني</label><input type="number" id="e2_${index}" value="${stdData.e2}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
-                    <div><label>الأنشطة</label><input type="number" id="act_${index}" value="${stdData.act}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
-                    <div><label>المعدل العام</label><div class="avg-box" id="avg_${index}" style="${bgStyle}">${stdData.avg}</div></div>
-                </div>
-            </div>`;
+        list.innerHTML += `<div class="student-row"><div class="student-name"><span class="student-number">${index + 1}</span> ${student}</div>
+            <div class="grades-grid">
+                <div><label>الفرض الأول</label><input type="number" id="e1_${index}" value="${stdData.e1}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
+                <div><label>الفرض الثاني</label><input type="number" id="e2_${index}" value="${stdData.e2}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
+                <div><label>الأنشطة</label><input type="number" id="act_${index}" value="${stdData.act}" min="0" max="20" step="0.25" oninput="calcAvg(${index})"></div>
+                <div><label>المعدل العام</label><div class="avg-box" id="avg_${index}" style="${bgStyle}">${stdData.avg}</div></div>
+            </div></div>`;
     });
 }
 function calcAvg(index) {
@@ -358,8 +517,7 @@ function calcAvg(index) {
     const avg = (((e1 + e2) / 2) * 0.75) + (act * 0.25);
     const avgBox = document.getElementById(`avg_${index}`);
     avgBox.innerText = avg.toFixed(2);
-    if (avg < 10) { avgBox.style.background = 'var(--danger)'; avgBox.style.color = 'white'; } 
-    else { avgBox.style.background = 'var(--accent)'; avgBox.style.color = 'white'; }
+    if (avg < 10) { avgBox.style.background = 'var(--danger)'; avgBox.style.color = 'white'; } else { avgBox.style.background = 'var(--accent)'; avgBox.style.color = 'white'; }
 }
 function saveGrades() {
     const date = document.getElementById('gradesDate').value;
@@ -367,13 +525,7 @@ function saveGrades() {
     if (!date || !cls) return;
     if (!db.grades[date]) db.grades[date] = {};
     db.grades[date][cls] = {};
-    db.students[cls].forEach((student, index) => {
-        const e1 = document.getElementById(`e1_${index}`).value;
-        const e2 = document.getElementById(`e2_${index}`).value;
-        const act = document.getElementById(`act_${index}`).value;
-        const avg = document.getElementById(`avg_${index}`).innerText;
-        db.grades[date][cls][student] = { e1, e2, act, avg };
-    });
+    db.students[cls].forEach((student, index) => { db.grades[date][cls][student] = { e1: document.getElementById(`e1_${index}`).value, e2: document.getElementById(`e2_${index}`).value, act: document.getElementById(`act_${index}`).value, avg: document.getElementById(`avg_${index}`).innerText }; });
     saveToCloud(true);
 }
 function shareGrades(type) {
@@ -396,185 +548,45 @@ function shareGrades(type) {
         link.download = `نقط_${cls}_${date}.csv`; link.click();
     }
 }
-
-/* ================== التقارير اليومية ================== */
-function viewReport() {
-    const date = document.getElementById('reportDate').value;
-    const selClass = document.getElementById('reportClassSelect').value;
-    const display = document.getElementById('reportDisplay');
-    const actions = document.getElementById('reportActions');
-    if (!date || !selClass || !db.records[date] || !db.records[date][selClass]) { display.style.display = 'none'; actions.style.display = 'none'; return; }
-    const records = db.records[date][selClass];
-    const formatName = s => `(${s.number || (db.students[selClass].indexOf(s.name) + 1)}) ${s.name}`;
-    const prepGood = records.filter(s => s.preparation === "إنجاز جيد" && s.attendance !== "غائب").map(formatName);
-    const prepMed = records.filter(s => s.preparation === "إنجاز متوسط" && s.attendance !== "غائب").map(formatName);
-    const prepWeak = records.filter(s => s.preparation === "إنجاز ضعيف" && s.attendance !== "غائب").map(formatName);
-    const noPrep = records.filter(s => s.preparation === "لم ينجز" && s.attendance !== "غائب").map(formatName);
-    const absentees = records.filter(s => s.attendance === "غائب").map(formatName);
-    const late = records.filter(s => s.attendance === "متأخر").map(formatName);
-
-    let html = `<h4>🗓️ تقرير: ${selClass} (${date})</h4><ul>`;
-    html += `<li><strong>بميزة جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
-    html += `<li><strong>بميزة متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
-    html += `<li><strong>بميزة ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li></ul>`;
-    html += `<strong>❌ لم ينجزوا (${noPrep.length}):</strong><br> ${noPrep.join('، ') || '-'}<br><br>`;
-    html += `<strong>🚫 المتغيبون (${absentees.length}):</strong><br> ${absentees.join('، ') || '-'}<br><br>`;
-    html += `<strong>⏳ المتأخرون (${late.length}):</strong><br> ${late.join('، ') || '-'}`;
-    display.innerHTML = html;
-    display.style.display = 'block'; actions.style.display = 'flex';
-    currentReportText = `*تقرير: ${selClass} (${date})*\n\n*المنجزون للإعداد:*\n- جيد: ${prepGood.join('، ') || '-'}\n- متوسط: ${prepMed.join('، ') || '-'}\n- ضعيف: ${prepWeak.join('، ') || '-'}\n\n*لم ينجزوا:*\n${noPrep.join('، ') || 'لا يوجد'}\n\n*الغياب:*\n${absentees.join('، ') || 'لا يوجد'}\n\n*التأخر:*\n${late.join('، ') || 'لا يوجد'}`;
-}
-function shareReport(type) {
-    if (!currentReportText) return;
-    if (type === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(currentReportText)}`, '_blank');
-    else if (type === 'telegram') window.open(`https://t.me/share/url?url=${encodeURIComponent(' ')}&text=${encodeURIComponent(currentReportText)}`, '_blank');
-    else if (type === 'download') {
-        const cleanText = currentReportText.replace(/\*/g, '');
-        const blob = new Blob(['\uFEFF' + cleanText], { type: 'text/plain;charset=utf-8' });
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-        link.download = `تقرير_${document.getElementById('reportClassSelect').value}.txt`; link.click();
-    }
-}
-
-/* ================== دفتر النصوص ================== */
-function toggleCompFields() {
-    const comp = document.getElementById('compSelect').value;
-    document.getElementById('comp_texts').style.display = comp === 'النصوص' ? 'block' : 'none';
-    document.getElementById('comp_lang').style.display = comp === 'الدرس اللغوي' ? 'block' : 'none';
-    document.getElementById('comp_expr').style.display = comp === 'التعبير والإنشاء' ? 'block' : 'none';
-    document.getElementById('comp_lit').style.display = comp === 'المؤلفات' ? 'block' : 'none';
-}
-function saveLessonLog() {
-    const date = document.getElementById('lessonDate').value;
-    const cls = document.getElementById('lessonClassSelect').value;
-    const comp = document.getElementById('compSelect').value;
-    if (!date || !cls || !comp) return alert("المرجو اختيار التاريخ والقسم والمكون.");
-    let entry = { id: Date.now(), component: comp, details: {} };
-    if (comp === 'النصوص') {
-        entry.details.title = document.getElementById('texts_title').value;
-        entry.details.steps = Array.from(document.querySelectorAll('input[name="texts_steps"]:checked')).map(cb => cb.value);
-        entry.details.analysis = Array.from(document.querySelectorAll('input[name="texts_analysis"]:checked')).map(cb => cb.value);
-    } else if (comp === 'الدرس اللغوي') {
-        entry.details.title = document.getElementById('lang_title').value;
-    } else if (comp === 'التعبير والإنشاء') {
-        entry.details.title = document.getElementById('expr_title').value;
-        entry.details.steps = Array.from(document.querySelectorAll('input[name="expr_steps"]:checked')).map(cb => cb.value);
-    } else if (comp === 'المؤلفات') {
-        entry.details.steps = Array.from(document.querySelectorAll('input[name="lit_steps"]:checked')).map(cb => cb.value);
-        entry.details.content = document.getElementById('lit_content').value;
-    }
-    if (!db.lessonLog[date]) db.lessonLog[date] = {};
-    if (!db.lessonLog[date][cls]) db.lessonLog[date][cls] = [];
-    db.lessonLog[date][cls].push(entry);
-    document.querySelectorAll('#lessonLogTab input[type="text"], #lessonLogTab textarea').forEach(el => el.value = '');
-    document.querySelectorAll('#lessonLogTab input[type="checkbox"]').forEach(el => el.checked = false);
-    document.getElementById('compSelect').value = '';
-    toggleCompFields();
-    saveToCloud(true);
-    viewLessonLog();
-}
-function viewLessonLog() {
-    const date = document.getElementById('lessonDate').value;
-    const cls = document.getElementById('lessonClassSelect').value;
-    const area = document.getElementById('lessonDisplayArea');
-    const display = document.getElementById('lessonLogDisplay');
-    if (!date || !cls || !db.lessonLog[date] || !db.lessonLog[date][cls] || db.lessonLog[date][cls].length === 0) { area.style.display = 'none'; return; }
-    const logs = db.lessonLog[date][cls];
-    let html = '';
-    logs.forEach(log => {
-        html += `<div class="log-entry">`;
-        html += `<button class="delete-log" onclick="deleteLessonLog(${log.id})">حذف</button>`;
-        html += `<h4>📘 المكون: ${log.component}</h4>`;
-        if (log.component === 'النصوص') {
-            if(log.details.title) html += `<strong>العنوان:</strong> ${log.details.title}<br>`;
-            if(log.details.steps.length > 0) html += `<strong>الخطوات:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
-            if(log.details.analysis.length > 0) html += `<strong>عناصر التحليل:</strong><ul><li>${log.details.analysis.join('</li><li>')}</li></ul>`;
-        } else if (log.component === 'الدرس اللغوي') {
-            html += `<strong>الظاهرة اللغوية:</strong> ${log.details.title || 'لم يحدد'}<br>`;
-        } else if (log.component === 'التعبير والإنشاء') {
-            if(log.details.title) html += `<strong>المهارة:</strong> ${log.details.title}<br>`;
-            if(log.details.steps.length > 0) html += `<strong>النشاط:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
-        } else if (log.component === 'المؤلفات') {
-            if(log.details.steps.length > 0) html += `<strong>القراءة:</strong><ul><li>${log.details.steps.join('</li><li>')}</li></ul>`;
-            if(log.details.content) html += `<strong>المحتوى المنجز:</strong><p style="margin-top:5px; background:white; padding:10px; border-radius:4px;">${log.details.content}</p>`;
-        }
-        html += `</div>`;
-    });
-    display.innerHTML = html;
-    area.style.display = 'block';
-}
-function deleteLessonLog(id) {
-    if(!confirm("هل أنت متأكد من حذف هذا السجل؟")) return;
-    const date = document.getElementById('lessonDate').value;
-    const cls = document.getElementById('lessonClassSelect').value;
-    db.lessonLog[date][cls] = db.lessonLog[date][cls].filter(log => log.id !== id);
-    saveToCloud(false);
-    viewLessonLog();
-}
-
-/* ================== إدارة الأقسام ================== */
 function addClass() {
     const name = document.getElementById('newClassName').value.trim();
     if (!name) return alert("المرجو إدخال اسم القسم.");
     if (db.classes.includes(name)) return alert("هذا القسم موجود مسبقاً!");
-    db.classes.push(name);
-    db.students[name] = [];
-    document.getElementById('newClassName').value = "";
-    init();
-    saveToCloud(true);
+    db.classes.push(name); db.students[name] = []; document.getElementById('newClassName').value = ""; init(); saveToCloud(true);
 }
 function deleteClass() {
     const selClass = document.getElementById('manageClassSelect').value;
     if (!selClass) return alert("المرجو اختيار قسم أولاً.");
-    if (confirm(`هل أنت متأكد من حذف قسم "${selClass}" بالكامل؟`)) {
-        db.classes = db.classes.filter(c => c !== selClass);
-        delete db.students[selClass];
-        init();
-        document.getElementById('studentManagementArea').style.display = 'none';
-        saveToCloud(true);
-    }
+    if (confirm(`هل أنت متأكد من حذف قسم "${selClass}" بالكامل؟`)) { db.classes = db.classes.filter(c => c !== selClass); delete db.students[selClass]; init(); document.getElementById('studentManagementArea').style.display = 'none'; saveToCloud(true); }
 }
 function renderStudentManagement() {
     const selClass = document.getElementById('manageClassSelect').value;
     const area = document.getElementById('studentManagementArea');
     const list = document.getElementById('manageStudentList');
     if (!selClass) { area.style.display = 'none'; return; }
-    area.style.display = 'block';
-    list.innerHTML = '';
+    area.style.display = 'block'; list.innerHTML = '';
     if (!db.students[selClass]) db.students[selClass] = [];
     db.students[selClass].forEach((student, index) => {
-        list.innerHTML += `<li><span><span class="student-number">${index + 1}</span> - ${student}</span>
-        <button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteStudent('${selClass}', ${index})">حذف التلميذ</button></li>`;
+        list.innerHTML += `<li><span><span class="student-number">${index + 1}</span> - ${student}</span><button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteStudent('${selClass}', ${index})">حذف</button></li>`;
     });
 }
 function addStudent() {
     const selClass = document.getElementById('manageClassSelect').value;
     const name = document.getElementById('newStudentName').value.trim();
-    if (!name || !selClass) return alert("المرجو التأكد من اختيار القسم وكتابة اسم التلميذ.");
-    db.students[selClass].push(name);
-    document.getElementById('newStudentName').value = "";
-    renderStudentManagement();
-    saveToCloud(false);
+    if (!name || !selClass) return alert("المرجو التأكد من الاختيارات.");
+    db.students[selClass].push(name); document.getElementById('newStudentName').value = ""; renderStudentManagement(); saveToCloud(false);
 }
 function deleteStudent(className, studentIndex) {
-    if (confirm("هل أنت متأكد من حذف هذا التلميذ؟")) {
-        db.students[className].splice(studentIndex, 1);
-        renderStudentManagement();
-        saveToCloud(false);
-    }
+    if (confirm("هل أنت متأكد من حذف هذا التلميذ؟")) { db.students[className].splice(studentIndex, 1); renderStudentManagement(); saveToCloud(false); }
 }
 function importStudents() {
     const file = document.getElementById('fileInput').files[0];
     const selectedClass = document.getElementById('manageClassSelect').value;
-    if (!selectedClass) return alert("المرجو اختيار القسم من القائمة أعلاه أولاً.");
-    if (!file) return alert("المرجو اختيار ملف txt.");
+    if (!selectedClass || !file) return alert("المرجو اختيار القسم والملف.");
     const reader = new FileReader();
     reader.onload = function(e) {
-        const lines = e.target.result.split('\n').map(line => line.replace(/\\s*/g, '').trim()).filter(line => line.length > 0);
-        db.students[selectedClass] = lines;
-        document.getElementById('fileInput').value = ""; 
-        renderStudentManagement();
-        saveToCloud(true);
+        db.students[selectedClass] = e.target.result.split('\n').map(line => line.replace(/\\s*/g, '').trim()).filter(line => line.length > 0);
+        document.getElementById('fileInput').value = ""; renderStudentManagement(); saveToCloud(true);
     };
     reader.readAsText(file);
 }

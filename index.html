@@ -41,9 +41,9 @@
         .student-row { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
         .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px;}
         .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
-        .options-group { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 5px;}
+        .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 5px;}
         .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem; width: 100%;}
-        .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
+        .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
         
         .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
@@ -111,33 +111,54 @@
                     <option value="المؤلفات">المؤلفات</option>
                 </select>
             </div>
+
             <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
-                <div class="options-group">
-                    <strong>الخطوات المنجزة:</strong>
-                    <label><input type="checkbox" name="texts_steps" value="تقديم"> تقديم</label>
-                    <label><input type="checkbox" name="texts_steps" value="ملاحظة النص وصياغة الفرضية"> ملاحظة النص وصياغة الفرضية</label>
-                    <label><input type="checkbox" name="texts_steps" value="فهم النص"> فهم النص</label>
-                    <label><input type="checkbox" name="texts_steps" value="تقويم مرحلي"> تقويم مرحلي</label>
-                    <label><input type="checkbox" name="texts_steps" value="خلاصة تركيبية"> خلاصة تركيبية</label>
-                    <label><input type="checkbox" name="texts_steps" value="تقويم ختامي"> تقويم ختامي</label>
+                
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+                    <strong style="color: var(--primary);">📘 الحصة الأولى:</strong>
+                    <div class="options-group" style="background: transparent; padding: 10px 0 0 0;">
+                        <label><input type="checkbox" name="texts_s1" value="التقديم"> التقديم</label>
+                        <label><input type="checkbox" name="texts_s1" value="ملاحظة النص وصياغة الفرضية"> ملاحظة النص وصياغة الفرضية</label>
+                        <label><input type="checkbox" name="texts_s1" value="فهم النص"> فهم النص</label>
+                        <label><input type="checkbox" name="texts_s1" value="تقويم مرحلي"> تقويم مرحلي</label>
+                    </div>
                 </div>
-                <div class="options-group" style="margin-top: 10px; background: #e8f4f8;">
-                    <strong>🔍 تحليل النص (اختر العناصر المنجزة):</strong>
-                    <label><input type="checkbox" name="texts_analysis" value="الحقول الدلالية"> الحقول الدلالية</label>
-                    <label><input type="checkbox" name="texts_analysis" value="أساليب التفسير"> أساليب التفسير</label>
-                    <label><input type="checkbox" name="texts_analysis" value="أساليب الحجاج"> أساليب الحجاج</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الأسلوب التقريري"> الأسلوب التقريري</label>
-                    <label><input type="checkbox" name="texts_analysis" value="البناء الحجاجي"> البناء الحجاجي</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الشخصيات وملامحها"> الشخصيات وملامحها</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الرؤية السردية"> الرؤية السردية</label>
-                    <label><input type="checkbox" name="texts_analysis" value="البنية العاملية"> البنية العاملية</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الزمان والمكان"> الزمان والمكان</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الصور الشعرية"> الصور الشعرية</label>
-                    <label><input type="checkbox" name="texts_analysis" value="البنية الإيقاعية"> البنية الإيقاعية</label>
-                    <label><input type="checkbox" name="texts_analysis" value="الوصف ووظيفته"> الوصف ووظيفته</label>
+
+                <div style="background: #fdf2e9; padding: 15px; border-radius: 5px;">
+                    <strong style="color: #d35400;">📙 الحصة الثانية:</strong>
+                    
+                    <div class="options-group" style="background: transparent; padding: 10px 0;">
+                        <strong style="font-size: 0.85rem; color: #d35400;">🔍 تحليل النص (اختر العناصر المنجزة):</strong>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الحقول الدلالية"> الحقول الدلالية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="أساليب التفسير"> أساليب التفسير</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="أساليب الحجاج"> أساليب الحجاج</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="ملامح الأسلوب التقريري"> الأسلوب التقريري</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="البناء الحجاجي"> البناء الحجاجي</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الحجج الموظفة"> الحجج الموظفة</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الروابط اللغوية ودلالتها"> الروابط اللغوية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الرؤية السردية"> الرؤية السردية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="البنية العاملية"> البنية العاملية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الشخصيات وملامحها"> الشخصيات</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الزمان والمكان"> الزمان والمكان</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الصورة الشعرية"> الصورة الشعرية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="البنية الإيقاعية"> البنية الإيقاعية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الأساليب الإنشائية"> الأساليب الإنشائية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الجمل الطويلة ووظيفتها"> الجمل الطويلة</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الوضعية التواصلية"> الوضعية التواصلية</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الوصف ودلالته"> الوصف ودلالته</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="الوصف الذاتي والموضوعي"> الوصف الذاتي والموضوعي</label>
+                        <label><input type="checkbox" name="texts_s2_analysis" value="عناصر أخرى متصلة بالنص"> عناصر أخرى</label>
+                    </div>
+
+                    <div class="options-group" style="background: transparent; padding: 10px 0 0 0; border-top: 1px solid #fadbd8;">
+                        <strong style="font-size: 0.85rem; color: #d35400;">📝 خواتيم الحصة:</strong>
+                        <label><input type="checkbox" name="texts_s2_end" value="خلاصة تركيبية"> خلاصة تركيبية</label>
+                        <label><input type="checkbox" name="texts_s2_end" value="تقويم ختامي"> تقويم ختامي</label>
+                    </div>
                 </div>
             </div>
+
             <div id="comp_lang" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="lang_title" placeholder="الظاهرة اللغوية المدروسة" style="width: 100%; box-sizing: border-box;">
             </div>
@@ -229,12 +250,21 @@
 
     <div id="reports" class="section">
         <div class="card">
-            <h3>استخراج التقرير اليومي</h3>
+            <h3>📊 استخراج التقارير</h3>
             <div class="controls">
+                <select id="reportTypeSelect" onchange="viewReport()" style="flex-grow: 1; font-weight: bold; color: var(--primary);">
+                    <option value="tracking">تتبع الإعداد والحضور</option>
+                    <option value="notes">الملاحظات الخاصة في القسم</option>
+                    <option value="lessons">دفتر النصوص التراكمي</option>
+                </select>
+            </div>
+            <div class="controls" style="background: #f9f9f9;">
                 <input type="date" id="reportDate" onchange="viewReport()">
                 <select id="reportClassSelect" onchange="viewReport()"><option value="">-- اختر القسم --</option></select>
             </div>
-            <div id="reportDisplay" style="display:none;"></div>
+            
+            <div id="reportDisplay" style="display:none; margin-top: 15px;"></div>
+            
             <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                 <button class="btn-whatsapp" onclick="shareReport('whatsapp')">📱 واتساب</button>
                 <button class="btn-telegram" onclick="shareReport('telegram')">✈️ تلغرام</button>
@@ -247,7 +277,7 @@
         <div class="card">
             <h3>📂 إضافة / حذف الأقسام</h3>
             <div class="controls">
-                <input type="text" id="newClassName" placeholder="اسم القسم الجديد (مثال: الثانية باك 1)">
+                <input type="text" id="newClassName" placeholder="اسم القسم الجديد">
                 <button class="btn-primary" onclick="addClass()">➕ إضافة القسم</button>
             </div>
             <div class="controls" style="background: #fff5f5; border: 1px solid #ffeeba;">
