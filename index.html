@@ -42,11 +42,10 @@
         .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem;}
         .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer;}
         
-        /* تنسيق خاص بشاشة النقط */
         .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
         .grades-grid input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-align: center;}
-        .avg-box { background: var(--secondary); color: white; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center;}
+        .avg-box { background: var(--secondary); color: white; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: background 0.3s;}
         
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
@@ -55,6 +54,8 @@
         #reportDisplay, #noteHistory { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
         .note-item { background: #fff5f5; border-right: 4px solid var(--danger); padding: 10px; margin-bottom: 10px; border-radius: 4px;}
         .note-item.positive { background: #f0fdf4; border-color: var(--accent); }
+        .manage-list { list-style: none; padding: 0; margin: 0;}
+        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: #f9f9f9; margin-bottom: 5px; border-radius: 4px;}
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -66,6 +67,7 @@
 <nav>
     <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
     <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
+    <button onclick="switchTab('miniExamsTab')">الفروض المصغرة</button>
     <button onclick="switchTab('gradesTab')">المراقبة المستمرة</button>
     <button onclick="switchTab('reports')">التقارير اليومية</button>
     <button onclick="switchTab('management')">إدارة الأقسام</button>
@@ -75,12 +77,19 @@
     <div id="tracking" class="section active">
         <div class="controls">
             <input type="date" id="recordDate" onchange="loadStudents()">
-            <select id="classSelect" onchange="loadStudents()">
-                <option value="">-- اختر القسم --</option>
-            </select>
+            <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
             <button class="btn-primary" onclick="saveData()">💾 حفظ البيانات</button>
         </div>
         <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+    </div>
+
+    <div id="miniExamsTab" class="section">
+        <div class="controls">
+            <input type="date" id="miniExamsDate" onchange="loadMiniExams()">
+            <select id="miniExamsClassSelect" onchange="loadMiniExams()"><option value="">-- اختر القسم --</option></select>
+            <button class="btn-primary" onclick="saveMiniExams()">💾 حفظ الفروض المصغرة</button>
+        </div>
+        <div id="miniExamsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
     <div id="notesTab" class="section">
@@ -88,12 +97,8 @@
             <h3>📝 تسجيل ملاحظة خاصة</h3>
             <div class="controls">
                 <input type="date" id="noteDate" onchange="loadNoteStudents()">
-                <select id="noteClassSelect" onchange="loadNoteStudents()">
-                    <option value="">-- اختر القسم --</option>
-                </select>
-                <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;">
-                    <option value="">-- اختر التلميذ --</option>
-                </select>
+                <select id="noteClassSelect" onchange="loadNoteStudents()"><option value="">-- اختر القسم --</option></select>
+                <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
             
             <div id="noteCheckboxesArea" style="display:none; margin-top:15px;">
@@ -123,9 +128,7 @@
     <div id="gradesTab" class="section">
         <div class="controls">
             <input type="date" id="gradesDate" onchange="loadGrades()">
-            <select id="gradesClassSelect" onchange="loadGrades()">
-                <option value="">-- اختر القسم --</option>
-            </select>
+            <select id="gradesClassSelect" onchange="loadGrades()"><option value="">-- اختر القسم --</option></select>
             <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
         </div>
         
@@ -144,9 +147,7 @@
             <h3>استخراج التقرير اليومي</h3>
             <div class="controls">
                 <input type="date" id="reportDate" onchange="viewReport()">
-                <select id="reportClassSelect" onchange="viewReport()">
-                    <option value="">-- اختر القسم --</option>
-                </select>
+                <select id="reportClassSelect" onchange="viewReport()"><option value="">-- اختر القسم --</option></select>
             </div>
             <div id="reportDisplay" style="display:none;"></div>
             <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
@@ -159,21 +160,20 @@
 
     <div id="management" class="section">
         <div class="card">
-            <h3>📂 إدارة الأقسام</h3>
+            <h3>📂 إضافة / حذف الأقسام</h3>
             <div class="controls">
                 <input type="text" id="newClassName" placeholder="اسم القسم الجديد (مثال: الثانية باك 1)">
-                <button class="btn-primary" onclick="addClass()">➕ إضافة</button>
+                <button class="btn-primary" onclick="addClass()">➕ إضافة القسم</button>
             </div>
             <div class="controls" style="background: #fff5f5; border: 1px solid #ffeeba;">
-                <select id="manageClassSelect" onchange="renderStudentManagement()">
-                    <option value="">-- اختر القسم للإدارة --</option>
-                </select>
-                <button class="btn-danger" onclick="deleteClass()">🗑️ حذف القسم بالكامل</button>
+                <select id="manageClassSelect" onchange="renderStudentManagement()"><option value="">-- اختر القسم للإدارة --</option></select>
+                <button class="btn-danger" onclick="deleteClass()">🗑️ حذف القسم المختار</button>
             </div>
         </div>
 
         <div class="card" id="studentManagementArea" style="display:none;">
             <h3>👥 إدارة تلاميذ القسم المختار</h3>
+            
             <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
                 <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
                 <div style="display: flex; gap:10px;">
@@ -181,6 +181,17 @@
                     <button class="btn-primary" onclick="importStudents()">استيراد</button>
                 </div>
             </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong style="display:block; margin-bottom:10px;">➕ إضافة تلميذ واحد:</strong>
+                <div style="display: flex; gap:10px;">
+                    <input type="text" id="newStudentName" placeholder="الاسم الكامل للتلميذ">
+                    <button class="btn-primary" onclick="addStudent()">إضافة</button>
+                </div>
+            </div>
+
+            <strong style="display:block; margin-bottom:10px;">📋 لائحة التلاميذ الحالية:</strong>
+            <ul id="manageStudentList" class="manage-list"></ul>
         </div>
     </div>
 </div>
