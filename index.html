@@ -22,6 +22,7 @@
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
         header h1 { margin: 0; font-size: 1.5rem; }
+        #cloudStatus { font-size: 0.85rem; margin-top: 8px; font-weight: bold; transition: color 0.3s; }
         nav { display: flex; justify-content: center; background: var(--secondary); padding: 0.5rem; gap: 5px; flex-wrap: wrap;}
         nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: 0.3s;}
         nav button.active { background: var(--accent); border-color: var(--accent); font-weight: bold;}
@@ -53,13 +54,12 @@
         .section.active { display: block; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
         .card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
-        #reportDisplay, #noteHistory { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
+        #reportDisplay, #noteHistory, #classNotesDisplay { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
         .note-item { background: #fff5f5; border-right: 4px solid var(--danger); padding: 10px; margin-bottom: 10px; border-radius: 4px;}
         .note-item.positive { background: #f0fdf4; border-color: var(--accent); }
         .manage-list { list-style: none; padding: 0; margin: 0;}
         .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: #f9f9f9; margin-bottom: 5px; border-radius: 4px;}
         
-        /* تنسيقات دفتر النصوص */
         .log-entry { background: var(--log-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--primary); position: relative;}
         .log-entry h4 { margin: 0 0 10px 0; color: var(--primary); }
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
@@ -72,6 +72,7 @@
 
 <header>
     <h1>دفتر الأستاذ الرقمي</h1>
+    <div id="cloudStatus" style="color: #f1c40f;">⏳ جاري الاتصال بالسحابة...</div>
 </header>
 <nav>
     <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
@@ -88,7 +89,7 @@
         <div class="controls">
             <input type="date" id="recordDate" onchange="loadStudents()">
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
-            <button class="btn-primary" onclick="saveData()">💾 حفظ الغياب</button>
+            <button class="btn-primary" onclick="saveData()">💾 حفظ التتبع</button>
         </div>
         <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
@@ -98,7 +99,6 @@
             <input type="date" id="lessonDate" onchange="viewLessonLog()">
             <select id="lessonClassSelect" onchange="viewLessonLog()"><option value="">-- اختر القسم --</option></select>
         </div>
-        
         <div class="card">
             <h3>📝 تدوين حصة جديدة</h3>
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
@@ -111,7 +111,6 @@
                     <option value="المؤلفات">المؤلفات</option>
                 </select>
             </div>
-
             <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
                 <div class="options-group">
@@ -139,11 +138,9 @@
                     <label><input type="checkbox" name="texts_analysis" value="الوصف ووظيفته"> الوصف ووظيفته</label>
                 </div>
             </div>
-
             <div id="comp_lang" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="lang_title" placeholder="الظاهرة اللغوية المدروسة" style="width: 100%; box-sizing: border-box;">
             </div>
-
             <div id="comp_expr" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="expr_title" placeholder="عنوان المهارة" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
                 <div class="options-group">
@@ -153,7 +150,6 @@
                     <label><input type="checkbox" name="expr_steps" value="أنشطة الإنتاج والتقويم"> أنشطة الإنتاج والتقويم</label>
                 </div>
             </div>
-
             <div id="comp_lit" style="display:none; animation: fadeIn 0.3s;">
                 <div class="options-group" style="margin-bottom: 10px;">
                     <strong>القراءة المنجزة:</strong>
@@ -161,12 +157,10 @@
                     <label><input type="checkbox" name="lit_steps" value="القراءة التحليلية"> القراءة التحليلية</label>
                     <label><input type="checkbox" name="lit_steps" value="القراءة التركيبية"> القراءة التركيبية</label>
                 </div>
-                <textarea id="lit_content" placeholder="المحتوى المنجز (اختياري) تفاصيل حول الفصول أو القضايا المعالجة..." style="width: 100%; box-sizing: border-box;"></textarea>
+                <textarea id="lit_content" placeholder="المحتوى المنجز (اختياري)..." style="width: 100%; box-sizing: border-box;"></textarea>
             </div>
-
             <button class="btn-primary" style="margin-top: 15px; width: 100%;" onclick="saveLessonLog()">📥 حفظ في دفتر النصوص</button>
         </div>
-
         <div class="card" id="lessonDisplayArea" style="display:none;">
             <h3>📖 المنجز في هذا اليوم</h3>
             <div id="lessonLogDisplay"></div>
@@ -191,8 +185,10 @@
                 <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
             
-            <div id="noteCheckboxesArea" style="display:none; margin-top:15px;">
-                <strong style="display:block; margin-bottom:10px;">اختر الملاحظات:</strong>
+            <button class="btn-primary" style="margin-bottom: 15px; width: 100%; background-color: #3498db;" onclick="viewClassNotes()">👁️ إظهار جميع الملاحظات في هذا القسم</button>
+
+            <div id="noteCheckboxesArea" style="display:none; margin-top:15px; border-top: 2px solid var(--bg); padding-top: 15px;">
+                <strong style="display:block; margin-bottom:10px;">اختر الملاحظات للتلميذ المحدد:</strong>
                 <div class="options-group" style="flex-direction: column; align-items: flex-start; gap:10px;">
                     <label><input type="checkbox" value="لم يحضر واجباته المدرسية"> لم يحضر واجباته المدرسية</label>
                     <label><input type="checkbox" value="عدم الالتزام بكتابة الدرس"> عدم الالتزام بكتابة الدرس</label>
@@ -205,8 +201,13 @@
             </div>
 
             <div id="noteHistoryArea" style="display:none; margin-top:20px;">
-                <h3>أرشيف ملاحظات التلميذ</h3>
+                <h3 id="studentArchiveTitle">أرشيف ملاحظات التلميذ</h3>
                 <div id="noteHistory"></div>
+            </div>
+
+            <div id="classNotesArea" style="display:none; margin-top:20px;">
+                <h3>أرشيف القسم بأكمله</h3>
+                <div id="classNotesDisplay"></div>
             </div>
         </div>
     </div>
@@ -254,7 +255,6 @@
                 <button class="btn-danger" onclick="deleteClass()">🗑️ حذف القسم المختار</button>
             </div>
         </div>
-
         <div class="card" id="studentManagementArea" style="display:none;">
             <h3>👥 إدارة تلاميذ القسم المختار</h3>
             <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
@@ -277,6 +277,9 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
