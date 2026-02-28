@@ -16,39 +16,45 @@
             --border: #ddd;
             --danger: #e74c3c;
             --telegram: #0088cc;
+            --excel: #217346;
         }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
         header h1 { margin: 0; font-size: 1.5rem; }
         nav { display: flex; justify-content: center; background: var(--secondary); padding: 0.5rem; gap: 8px; flex-wrap: wrap;}
-        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 1rem; transition: 0.3s;}
+        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.3s;}
         nav button.active { background: var(--accent); border-color: var(--accent); font-weight: bold;}
-        .container { padding: 20px; max-width: 800px; margin: auto; }
+        .container { padding: 20px; max-width: 900px; margin: auto; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        select, input[type="text"], input[type="date"], input[type="file"], button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
         select, input[type="text"] { flex-grow: 1; min-width: 200px;}
         button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none;}
         button.btn-primary { background-color: var(--accent); }
-        button.btn-primary:hover { background-color: #219653; }
         button.btn-danger { background-color: var(--danger); }
         button.btn-whatsapp { background-color: #25D366; }
         button.btn-telegram { background-color: var(--telegram); }
         button.btn-download { background-color: #3498db; }
+        button.btn-excel { background-color: var(--excel); }
         .student-row { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
         .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px;}
         .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
         .options-group { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 8px; border-radius: 5px;}
         .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem;}
         .options-group label { font-size: 0.95rem; display: flex; align-items: center; gap: 5px; cursor: pointer;}
+        
+        /* تنسيق خاص بشاشة النقط */
+        .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px;}
+        .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
+        .grades-grid input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-align: center;}
+        .avg-box { background: var(--secondary); color: white; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center;}
+        
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
         .card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
-        .manage-list { list-style: none; padding: 0; margin: 0;}
-        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--bg); align-items: center;}
-        #reportDisplay { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; display: none; line-height: 1.8;}
-        #reportDisplay h4 { margin: 0 0 10px 0; color: var(--primary); }
-        #reportDisplay ul { margin: 0 0 15px 0; padding-right: 20px;}
+        #reportDisplay, #noteHistory { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
+        .note-item { background: #fff5f5; border-right: 4px solid var(--danger); padding: 10px; margin-bottom: 10px; border-radius: 4px;}
+        .note-item.positive { background: #f0fdf4; border-color: var(--accent); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -59,6 +65,8 @@
 </header>
 <nav>
     <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
+    <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
+    <button onclick="switchTab('gradesTab')">المراقبة المستمرة</button>
     <button onclick="switchTab('reports')">التقارير اليومية</button>
     <button onclick="switchTab('management')">إدارة الأقسام</button>
 </nav>
@@ -72,9 +80,63 @@
             </select>
             <button class="btn-primary" onclick="saveData()">💾 حفظ البيانات</button>
         </div>
-        <div id="studentsList">
-            <p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم لعرض لائحة التلاميذ.</p>
+        <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+    </div>
+
+    <div id="notesTab" class="section">
+        <div class="card">
+            <h3>📝 تسجيل ملاحظة خاصة</h3>
+            <div class="controls">
+                <input type="date" id="noteDate" onchange="loadNoteStudents()">
+                <select id="noteClassSelect" onchange="loadNoteStudents()">
+                    <option value="">-- اختر القسم --</option>
+                </select>
+                <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;">
+                    <option value="">-- اختر التلميذ --</option>
+                </select>
+            </div>
+            
+            <div id="noteCheckboxesArea" style="display:none; margin-top:15px;">
+                <strong style="display:block; margin-bottom:10px;">اختر الملاحظات:</strong>
+                <div class="options-group" style="flex-direction: column; align-items: flex-start; gap:10px;">
+                    <label><input type="checkbox" value="لم يحضر واجباته المدرسية"> لم يحضر واجباته المدرسية</label>
+                    <label><input type="checkbox" value="عدم الالتزام بكتابة الدرس"> عدم الالتزام بكتابة الدرس</label>
+                    <label><input type="checkbox" value="النوم فوق الطاولة رغم تكرار التنبيه"> النوم فوق الطاولة رغم تكرار التنبيه</label>
+                    <label><input type="checkbox" value="الإكثار من الضحك في القسم"> الإكثار من الضحك في القسم</label>
+                    <label><input type="checkbox" value="الإكثار من التشويش والحركة"> الإكثار من التشويش والحركة</label>
+                    <label style="color: var(--accent); font-weight:bold;"><input type="checkbox" value="تقديم مشاركة متميزة"> تقديم مشاركة متميزة 🌟</label>
+                </div>
+                <button class="btn-primary" style="margin-top:15px;" onclick="saveNotes()">💾 حفظ الملاحظات</button>
+            </div>
+
+            <div id="noteHistoryArea" style="display:none; margin-top:20px;">
+                <h3>أرشيف ملاحظات التلميذ</h3>
+                <div id="noteHistory"></div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-whatsapp" onclick="shareNotes('whatsapp')">📱 واتساب</button>
+                    <button class="btn-telegram" onclick="shareNotes('telegram')">✈️ تلغرام</button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div id="gradesTab" class="section">
+        <div class="controls">
+            <input type="date" id="gradesDate" onchange="loadGrades()">
+            <select id="gradesClassSelect" onchange="loadGrades()">
+                <option value="">-- اختر القسم --</option>
+            </select>
+            <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
+        </div>
+        
+        <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <strong style="width: 100%;">تصدير اللائحة:</strong>
+            <button class="btn-whatsapp" onclick="shareGrades('whatsapp')">📱 واتساب</button>
+            <button class="btn-telegram" onclick="shareGrades('telegram')">✈️ تلغرام</button>
+            <button class="btn-excel" onclick="shareGrades('excel')">📊 تصدير Excel (CSV)</button>
+        </div>
+
+        <div id="gradesList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
     <div id="reports" class="section">
@@ -86,9 +148,7 @@
                     <option value="">-- اختر القسم --</option>
                 </select>
             </div>
-            
-            <div id="reportDisplay"></div>
-
+            <div id="reportDisplay" style="display:none;"></div>
             <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                 <button class="btn-whatsapp" onclick="shareReport('whatsapp')">📱 واتساب</button>
                 <button class="btn-telegram" onclick="shareReport('telegram')">✈️ تلغرام</button>
@@ -102,7 +162,7 @@
             <h3>📂 إدارة الأقسام</h3>
             <div class="controls">
                 <input type="text" id="newClassName" placeholder="اسم القسم الجديد (مثال: الثانية باك 1)">
-                <button class="btn-primary" onclick="addClass()">➕ إضافة قسم</button>
+                <button class="btn-primary" onclick="addClass()">➕ إضافة</button>
             </div>
             <div class="controls" style="background: #fff5f5; border: 1px solid #ffeeba;">
                 <select id="manageClassSelect" onchange="renderStudentManagement()">
@@ -114,7 +174,6 @@
 
         <div class="card" id="studentManagementArea" style="display:none;">
             <h3>👥 إدارة تلاميذ القسم المختار</h3>
-            
             <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
                 <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
                 <div style="display: flex; gap:10px;">
@@ -122,17 +181,6 @@
                     <button class="btn-primary" onclick="importStudents()">استيراد</button>
                 </div>
             </div>
-
-            <div style="margin-bottom: 20px;">
-                <strong style="display:block; margin-bottom:10px;">➕ إضافة تلميذ واحد:</strong>
-                <div style="display: flex; gap:10px;">
-                    <input type="text" id="newStudentName" placeholder="الاسم الكامل للتلميذ">
-                    <button class="btn-primary" onclick="addStudent()">إضافة</button>
-                </div>
-            </div>
-
-            <strong style="display:block; margin-bottom:10px;">📋 لائحة التلاميذ الحالية:</strong>
-            <ul id="manageStudentList" class="manage-list"></ul>
         </div>
     </div>
 </div>
