@@ -18,6 +18,7 @@
             --telegram: #0088cc;
             --excel: #217346;
             --log-bg: #e8f4f8;
+            --rand: #9b59b6;
         }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
@@ -76,6 +77,7 @@
 </header>
 <nav>
     <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
+    <button onclick="switchTab('randomizerTab')">القرعة</button>
     <button onclick="switchTab('lessonLogTab')">دفتر النصوص</button>
     <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
     <button onclick="switchTab('miniExamsTab')">الفروض</button>
@@ -92,6 +94,34 @@
             <button class="btn-primary" onclick="saveData()">💾 حفظ التتبع</button>
         </div>
         <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+    </div>
+
+    <div id="randomizerTab" class="section">
+        <div class="card">
+            <h3>🎲 عجلة القرعة العشوائية</h3>
+            <div class="controls">
+                <select id="randClassSelect"><option value="">-- اختر القسم (لسحب تلميذ) --</option></select>
+                <select id="randCatSelect"><option value="">-- اختر مجموعة الموضوعات --</option></select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="btn-primary" style="background-color: var(--rand); flex-grow: 1;" onclick="drawRandom('both')">🎲 سحب تلميذ + موضوع</button>
+                <button class="btn-primary" style="background-color: #34495e; flex-grow: 1;" onclick="drawRandom('topic')">🎯 سحب موضوع فقط</button>
+                <button class="btn-primary" style="background-color: #e67e22; flex-grow: 1;" onclick="drawRandom('student')">👤 سحب تلميذ فقط</button>
+            </div>
+            <div id="drawResult" style="display:none; background: #fdf2e9; border: 2px dashed #e67e22; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s;">
+                </div>
+        </div>
+
+        <div class="card">
+            <h3>📂 إدارة موضوعات القرعة</h3>
+            <div class="controls">
+                <input type="text" id="newRandCatName" placeholder="اسم المجموعة (مثال: موضوعات عامة)">
+                <input type="file" id="randFileInput" accept=".txt">
+                <button class="btn-primary" onclick="addTopicCategory()">➕ إضافة المجموعة</button>
+            </div>
+            <strong style="display:block; margin-bottom:10px;">📋 المجموعات المتوفرة:</strong>
+            <ul id="randCatList" class="manage-list"></ul>
+        </div>
     </div>
 
     <div id="lessonLogTab" class="section">
@@ -114,7 +144,6 @@
 
             <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
-                
                 <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
                     <strong style="color: var(--primary);">📘 الحصة الأولى:</strong>
                     <div class="options-group" style="background: transparent; padding: 10px 0 0 0;">
@@ -124,10 +153,8 @@
                         <label><input type="checkbox" name="texts_s1" value="تقويم مرحلي"> تقويم مرحلي</label>
                     </div>
                 </div>
-
                 <div style="background: #fdf2e9; padding: 15px; border-radius: 5px;">
                     <strong style="color: #d35400;">📙 الحصة الثانية:</strong>
-                    
                     <div class="options-group" style="background: transparent; padding: 10px 0;">
                         <strong style="font-size: 0.85rem; color: #d35400;">🔍 تحليل النص (اختر العناصر المنجزة):</strong>
                         <label><input type="checkbox" name="texts_s2_analysis" value="الحقول الدلالية"> الحقول الدلالية</label>
@@ -150,7 +177,6 @@
                         <label><input type="checkbox" name="texts_s2_analysis" value="الوصف الذاتي والموضوعي"> الوصف الذاتي والموضوعي</label>
                         <label><input type="checkbox" name="texts_s2_analysis" value="عناصر أخرى متصلة بالنص"> عناصر أخرى</label>
                     </div>
-
                     <div class="options-group" style="background: transparent; padding: 10px 0 0 0; border-top: 1px solid #fadbd8;">
                         <strong style="font-size: 0.85rem; color: #d35400;">📝 خواتيم الحصة:</strong>
                         <label><input type="checkbox" name="texts_s2_end" value="خلاصة تركيبية"> خلاصة تركيبية</label>
@@ -216,7 +242,10 @@
                     <label><input type="checkbox" value="النوم فوق الطاولة رغم تكرار التنبيه"> النوم فوق الطاولة رغم تكرار التنبيه</label>
                     <label><input type="checkbox" value="الإكثار من الضحك في القسم"> الإكثار من الضحك في القسم</label>
                     <label><input type="checkbox" value="الإكثار من التشويش والحركة"> الإكثار من التشويش والحركة</label>
+                    <label><input type="checkbox" value="التلفظ بكلمات غير لائقة"> التلفظ بكلمات غير لائقة</label>
+                    <label><input type="checkbox" value="الحديث الثنائي أو الجانبي أثناء الشرح"> الحديث الثنائي أو الجانبي أثناء الشرح</label>
                     <label style="color: var(--accent); font-weight:bold;"><input type="checkbox" value="تقديم مشاركة متميزة"> تقديم مشاركة متميزة 🌟</label>
+                    <label style="color: var(--accent); font-weight:bold;"><input type="checkbox" value="استحقاق نقطة حسنة"> استحقاق نقطة حسنة 🌟</label>
                 </div>
                 <button class="btn-primary" style="margin-top:15px;" onclick="saveNotes()">💾 حفظ الملاحظات</button>
             </div>
@@ -256,6 +285,7 @@
                     <option value="tracking">تتبع الإعداد والحضور</option>
                     <option value="notes">الملاحظات الخاصة في القسم</option>
                     <option value="lessons">دفتر النصوص التراكمي</option>
+                    <option value="miniExams">نقط الفروض المصغرة</option>
                 </select>
             </div>
             <div class="controls" style="background: #f9f9f9;">
