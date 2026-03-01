@@ -1,21 +1,26 @@
 {
   "name": "دفتر الأستاذ الرقمي",
   "short_name": "دفتر الأستاذ",
+  "description": "تطبيق رقمي لمتابعة أداء التلاميذ، الغياب، الملاحظات، والنقط.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f7f6",
   "theme_color": "#2c3e50",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
   "icons": [
     {
       "src": "icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ]
 }
