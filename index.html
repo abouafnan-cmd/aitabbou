@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,87 +8,145 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #27ae60;
-            --bg: #f4f7f6;
-            --text: #333;
-            --border: #ddd;
-            --danger: #e74c3c;
-            --telegram: #0088cc;
-            --excel: #217346;
-            --log-bg: #e8f4f8;
-            --rand: #9b59b6;
+            --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60;
+            --bg: #f4f7f6; --card-bg: #ffffff; --text: #333; --border: #ddd;
+            --danger: #e74c3c; --telegram: #0088cc; --excel: #217346;
+            --log-bg: #e8f4f8; --rand: #9b59b6; --input-bg: #fff;
         }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
-        header { background-color: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+        [data-theme="dark"] {
+            --primary: #1a252f; --secondary: #2c3e50; --accent: #2ecc71;
+            --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; --border: #444;
+            --danger: #c0392b; --log-bg: #2c3e50; --input-bg: #333;
+        }
+
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
+        header { background-color: var(--primary); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative;}
         header h1 { margin: 0; font-size: 1.5rem; }
         #cloudStatus { font-size: 0.85rem; margin-top: 8px; font-weight: bold; transition: color 0.3s; }
-        nav { display: flex; justify-content: center; background: var(--secondary); padding: 0.5rem; gap: 5px; flex-wrap: wrap;}
-        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 6px 8px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: 0.3s;}
+        .theme-toggle { position: absolute; top: 15px; left: 15px; background: none; border: 1px solid white; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        
+        /* جعل القائمة قابلة للتمرير في الهواتف */
+        nav { display: flex; background: var(--secondary); padding: 0.5rem; gap: 5px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        nav::-webkit-scrollbar { display: none; }
+        nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.9rem; flex-shrink: 0; transition: 0.3s;}
         nav button.active { background: var(--accent); border-color: var(--accent); font-weight: bold;}
+        
         .container { padding: 20px; max-width: 900px; margin: auto; }
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], textarea, button { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem;}
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], input[type="password"], textarea { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem; background-color: var(--input-bg); color: var(--text); }
         select, input[type="text"], textarea { flex-grow: 1; min-width: 200px;}
         textarea { resize: vertical; min-height: 80px;}
-        button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none;}
+        button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none; padding: 10px; border-radius: 5px;}
         button.btn-primary { background-color: var(--accent); }
         button.btn-danger { background-color: var(--danger); }
         button.btn-whatsapp { background-color: #25D366; }
         button.btn-telegram { background-color: var(--telegram); }
         button.btn-download { background-color: #3498db; }
         button.btn-excel { background-color: var(--excel); }
-        .student-row { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
-        .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px;}
-        .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
-        .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 5px;}
-        .options-group strong { min-width: 80px; color: #555; font-size: 0.95rem; width: 100%;}
-        .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
         
-        .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px;}
+        .student-row { background: var(--card-bg); padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
+        .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
+        .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
+        .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 5px;}
+        .options-group strong { min-width: 80px; font-size: 0.95rem; width: 100%;}
+        .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--card-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
+        
+        .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
-        .grades-grid input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-align: center;}
+        .grades-grid input { padding: 8px; text-align: center;}
         .avg-box { background: var(--secondary); color: white; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: background 0.3s;}
         
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
         .card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
-        #reportDisplay, #noteHistory, #classNotesDisplay { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
-        .note-item { background: #fff5f5; border-right: 4px solid var(--danger); padding: 10px; margin-bottom: 10px; border-radius: 4px;}
-        .note-item.positive { background: #f0fdf4; border-color: var(--accent); }
+        #reportDisplay, #noteHistory, #classNotesDisplay, #portfolioDisplay { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
+        
         .manage-list { list-style: none; padding: 0; margin: 0;}
-        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: #f9f9f9; margin-bottom: 5px; border-radius: 4px;}
+        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: rgba(0,0,0,0.02); margin-bottom: 5px; border-radius: 4px;}
         
         .log-entry { background: var(--log-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--primary); position: relative;}
         .log-entry h4 { margin: 0 0 10px 0; color: var(--primary); }
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
         .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
         
+        /* شاشة القفل */
+        #pinScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;}
+        #pinScreen h2 { margin-bottom: 20px; font-size: 2rem;}
+        .pin-inputs { display: flex; gap: 10px; margin-bottom: 20px;}
+        .pin-inputs input { width: 50px; height: 50px; font-size: 2rem; text-align: center; border-radius: 10px; border: none; }
+        
+        /* الإشعارات الذكية */
+        #toastContainer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px;}
+        .toast { background: var(--accent); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; animation: slideUp 0.3s, fadeOut 0.5s 2.5s forwards; }
+        
+        /* لوحة التحكم */
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .dash-card { background: var(--accent); color: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+        .dash-card h2 { margin: 0; font-size: 2.5rem; }
+        .dash-card p { margin: 5px 0 0 0; font-size: 1rem; opacity: 0.9;}
+        .dash-card.blue { background: #3498db; }
+        .dash-card.red { background: #e74c3c; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        /* تنسيقات الطباعة */
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
+<div id="pinScreen">
+    <h2 id="pinTitle">🔒 أدخل الرمز السري</h2>
+    <div style="margin-bottom: 15px; color: #a8e6cf; font-size: 0.9rem;" id="pinHint"></div>
+    <div class="pin-inputs">
+        <input type="password" id="pinCode" maxlength="4" placeholder="****" style="width: 150px; letter-spacing: 15px;">
+    </div>
+    <button class="btn-primary" style="padding: 10px 40px; font-size: 1.2rem;" onclick="processPin()">دخول</button>
+</div>
+
+<div id="toastContainer"></div>
+
 <header>
     <h1>دفتر الأستاذ الرقمي</h1>
-    <div id="cloudStatus" style="color: #f1c40f;">⏳ جاري الاتصال بالسحابة...</div>
+    <div id="cloudStatus" style="color: #f1c40f;">⏳ جاري الاتصال...</div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 ليلي / نهاري</button>
 </header>
 <nav>
-    <button class="active" onclick="switchTab('tracking')">تتبع الأداء</button>
-    <button onclick="switchTab('disciplinaryTab')" style="background-color: #c0392b; color: white;">إجراءات تأديبية</button>
-    <button onclick="switchTab('randomizerTab')">القرعة</button>
+    <button class="active" onclick="switchTab('dashboardTab')">📊 لوحة التحكم</button>
+    <button onclick="switchTab('tracking')">تتبع الأداء</button>
+    <button onclick="switchTab('portfolioTab')">📁 ملف التلميذ</button>
     <button onclick="switchTab('lessonLogTab')">دفتر النصوص</button>
     <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
+    <button onclick="switchTab('disciplinaryTab')" style="background-color: #c0392b; color: white;">إجراءات تأديبية</button>
     <button onclick="switchTab('miniExamsTab')">الفروض</button>
     <button onclick="switchTab('gradesTab')">المراقبة المستمرة</button>
+    <button onclick="switchTab('randomizerTab')">القرعة</button>
     <button onclick="switchTab('reports')">التقارير</button>
     <button onclick="switchTab('management')">الإدارة</button>
 </nav>
 
 <div class="container">
-    <div id="tracking" class="section active">
+
+    <div id="dashboardTab" class="section active">
+        <div class="card">
+            <h3>مرحباً بك أستاذي الكريم 🌟</h3>
+            <p style="color: #777;">نظرة عامة على إحصائيات الأقسام:</p>
+            <div class="dash-grid" id="dashGrid">
+                <div class="dash-card blue"><h2>0</h2><p>إجمالي التلاميذ</p></div>
+                <div class="dash-card"><h2>0</h2><p>الأقسام المسجلة</p></div>
+                <div class="dash-card red"><h2>0</h2><p>غيابات اليوم</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tracking" class="section">
         <div class="controls">
             <input type="date" id="recordDate" onchange="loadStudents()">
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
@@ -97,34 +155,38 @@
         <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
-    <div id="disciplinaryTab" class="section">
-        <div class="card" style="background: #fff3f3; border: 1px solid #f5b7b1;">
-            <h3 style="color: #c0392b; border-bottom-color: #fadbd8;">⚖️ اتخاذ إجراء تأديبي</h3>
-            <p style="font-size: 0.95rem; color: #555; line-height: 1.6; border-bottom: 1px solid #fadbd8; padding-bottom: 10px;">
-                صفحة خاصة باستعراض التلميذات والتلاميذ الذي اتخذت فيهم إجراءات تأديبية، وكتب في حقهم تقرير تأديبي إلى الإدارة من أجل استدعائهم وتنبيههم، أو استدعاء أولياء أمورهم.
-            </p>
-            <div class="controls" style="margin-top: 15px; background: white;">
-                <input type="date" id="discDate">
-                <select id="discClassSelect" onchange="loadDiscStudents()">
-                    <option value="">-- اختر القسم --</option>
-                </select>
-                <select id="discStudentSelect" style="display:none;">
-                    <option value="">-- اختر التلميذ --</option>
-                </select>
+    <div id="portfolioTab" class="section">
+        <div class="card">
+            <h3>📁 الملف الشامل للتلميذ</h3>
+            <div class="controls">
+                <select id="portClassSelect" onchange="loadPortfolioStudents()"><option value="">-- اختر القسم --</option></select>
+                <select id="portStudentSelect" onchange="viewPortfolio()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
-            <div id="discUploadArea" style="display:none; margin-top: 15px; background: white; padding: 15px; border-radius: 8px;">
-                <strong style="display:block; margin-bottom: 10px; color: #c0392b;">📎 إرفاق التقرير التأديبي (ملف PDF):</strong>
-                <input type="file" id="discPdfFile" accept="application/pdf" style="width: 100%; box-sizing: border-box; margin-bottom: 15px; border: 1px solid #fadbd8;">
-                <button class="btn-danger" style="width: 100%; background-color: #c0392b;" onclick="saveDisciplinary()">💾 حفظ الإجراء وإرفاق التقرير</button>
+            <div id="portfolioDisplay" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div id="disciplinaryTab" class="section">
+        <div class="card" style="border: 1px solid var(--danger);">
+            <h3 style="color: var(--danger); border-bottom-color: var(--border);">⚖️ اتخاذ إجراء تأديبي</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                صفحة خاصة باستعراض التلميذات والتلاميذ الذي اتخذت فيهم إجراءات تأديبية، وكتب في حقهم تقرير تأديبي إلى الإدارة.
+            </p>
+            <div class="controls" style="margin-top: 15px;">
+                <input type="date" id="discDate">
+                <select id="discClassSelect" onchange="loadDiscStudents()"><option value="">-- اختر القسم --</option></select>
+                <select id="discStudentSelect" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
+            </div>
+            <div id="discUploadArea" style="display:none; margin-top: 15px; padding: 15px; border-radius: 8px; border: 1px dashed var(--danger);">
+                <strong style="display:block; margin-bottom: 10px; color: var(--danger);">📎 إرفاق التقرير التأديبي (ملف PDF):</strong>
+                <input type="file" id="discPdfFile" accept="application/pdf" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+                <button class="btn-danger" style="width: 100%;" onclick="saveDisciplinary()">💾 حفظ الإجراء وإرفاق التقرير</button>
             </div>
         </div>
-
         <div class="card">
             <h3 style="color: var(--primary);">🗂️ سجل الإجراءات التأديبية المتخذة</h3>
-            <div class="controls" style="background: #f9f9f9;">
-                <select id="discFilterClass" onchange="viewDisciplinary()">
-                    <option value="">-- عرض جميع الأقسام --</option>
-                </select>
+            <div class="controls">
+                <select id="discFilterClass" onchange="viewDisciplinary()"><option value="">-- عرض جميع الأقسام --</option></select>
             </div>
             <div id="discArchiveDisplay"></div>
         </div>
@@ -142,7 +204,7 @@
                 <button class="btn-primary" style="background-color: #34495e; flex-grow: 1;" onclick="drawRandom('topic')">🎯 سحب موضوع فقط</button>
                 <button class="btn-primary" style="background-color: #e67e22; flex-grow: 1;" onclick="drawRandom('student')">👤 سحب تلميذ فقط</button>
             </div>
-            <div id="drawResult" style="display:none; background: #fdf2e9; border: 2px dashed #e67e22; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s;"></div>
+            <div id="drawResult" style="display:none; background: var(--log-bg); border: 2px dashed #e67e22; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s;"></div>
         </div>
         <div class="card">
             <h3>📂 إدارة موضوعات القرعة</h3>
@@ -175,7 +237,7 @@
             </div>
             <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
-                <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+                <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
                     <strong style="color: var(--primary);">📘 الحصة الأولى:</strong>
                     <div class="options-group" style="background: transparent; padding: 10px 0 0 0;">
                         <label><input type="checkbox" name="texts_s1" value="التقديم"> التقديم</label>
@@ -184,10 +246,10 @@
                         <label><input type="checkbox" name="texts_s1" value="تقويم مرحلي"> تقويم مرحلي</label>
                     </div>
                 </div>
-                <div style="background: #fdf2e9; padding: 15px; border-radius: 5px;">
+                <div style="background: rgba(211, 84, 0, 0.05); padding: 15px; border-radius: 5px;">
                     <strong style="color: #d35400;">📙 الحصة الثانية:</strong>
                     <div class="options-group" style="background: transparent; padding: 10px 0;">
-                        <strong style="font-size: 0.85rem; color: #d35400;">🔍 تحليل النص (اختر العناصر المنجزة):</strong>
+                        <strong style="font-size: 0.85rem; color: #d35400;">🔍 تحليل النص:</strong>
                         <label><input type="checkbox" name="texts_s2_analysis" value="الحقول الدلالية"> الحقول الدلالية</label>
                         <label><input type="checkbox" name="texts_s2_analysis" value="أساليب التفسير"> أساليب التفسير</label>
                         <label><input type="checkbox" name="texts_s2_analysis" value="أساليب الحجاج"> أساليب الحجاج</label>
@@ -208,7 +270,7 @@
                         <label><input type="checkbox" name="texts_s2_analysis" value="الوصف الذاتي والموضوعي"> الوصف الذاتي والموضوعي</label>
                         <label><input type="checkbox" name="texts_s2_analysis" value="عناصر أخرى متصلة بالنص"> عناصر أخرى</label>
                     </div>
-                    <div class="options-group" style="background: transparent; padding: 10px 0 0 0; border-top: 1px solid #fadbd8;">
+                    <div class="options-group" style="background: transparent; padding: 10px 0 0 0; border-top: 1px solid rgba(0,0,0,0.1);">
                         <strong style="font-size: 0.85rem; color: #d35400;">📝 خواتيم الحصة:</strong>
                         <label><input type="checkbox" name="texts_s2_end" value="خلاصة تركيبية"> خلاصة تركيبية</label>
                         <label><input type="checkbox" name="texts_s2_end" value="تقويم ختامي"> تقويم ختامي</label>
@@ -261,10 +323,8 @@
                 <select id="noteClassSelect" onchange="loadNoteStudents()"><option value="">-- اختر القسم --</option></select>
                 <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
-            
             <button class="btn-primary" style="margin-bottom: 15px; width: 100%; background-color: #3498db;" onclick="viewClassNotes()">👁️ إظهار جميع الملاحظات في هذا القسم</button>
-
-            <div id="noteCheckboxesArea" style="display:none; margin-top:15px; border-top: 2px solid var(--bg); padding-top: 15px;">
+            <div id="noteCheckboxesArea" style="display:none; margin-top:15px; border-top: 2px solid var(--border); padding-top: 15px;">
                 <strong style="display:block; margin-bottom:10px;">اختر الملاحظات للتلميذ المحدد:</strong>
                 <div class="options-group" style="flex-direction: column; align-items: flex-start; gap:10px;">
                     <label><input type="checkbox" value="لم يحضر واجباته المدرسية"> لم يحضر واجباته المدرسية</label>
@@ -296,7 +356,7 @@
             <select id="gradesClassSelect" onchange="loadGrades()"><option value="">-- اختر القسم --</option></select>
             <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
         </div>
-        <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <strong style="width: 100%;">تصدير اللائحة:</strong>
             <button class="btn-whatsapp" onclick="shareGrades('whatsapp')">📱 واتساب</button>
             <button class="btn-telegram" onclick="shareGrades('telegram')">✈️ تلغرام</button>
@@ -316,12 +376,17 @@
                     <option value="miniExams">نقط الفروض المصغرة</option>
                 </select>
             </div>
-            <div class="controls" style="background: #f9f9f9;">
+            <div class="controls" style="background: rgba(0,0,0,0.02);">
                 <input type="date" id="reportDate" onchange="viewReport()">
                 <select id="reportClassSelect" onchange="viewReport()"><option value="">-- اختر القسم --</option></select>
             </div>
-            <div id="reportDisplay" style="display:none; margin-top: 15px;"></div>
+            
+            <div id="printArea">
+                <div id="reportDisplay" style="display:none; margin-top: 15px;"></div>
+            </div>
+            
             <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                <button class="btn-primary" style="background-color: #e74c3c;" onclick="printPDFReport()">🖨️ طباعة / استخراج PDF</button>
                 <button class="btn-whatsapp" onclick="shareReport('whatsapp')">📱 واتساب</button>
                 <button class="btn-telegram" onclick="shareReport('telegram')">✈️ تلغرام</button>
                 <button class="btn-download" onclick="shareReport('download')">⬇️ تحميل نصي</button>
@@ -336,14 +401,14 @@
                 <input type="text" id="newClassName" placeholder="اسم القسم الجديد">
                 <button class="btn-primary" onclick="addClass()">➕ إضافة القسم</button>
             </div>
-            <div class="controls" style="background: #fff5f5; border: 1px solid #ffeeba;">
+            <div class="controls" style="background: rgba(231, 76, 60, 0.05); border: 1px solid rgba(231, 76, 60, 0.2);">
                 <select id="manageClassSelect" onchange="renderStudentManagement()"><option value="">-- اختر القسم للإدارة --</option></select>
                 <button class="btn-danger" onclick="deleteClass()">🗑️ حذف القسم المختار</button>
             </div>
         </div>
         <div class="card" id="studentManagementArea" style="display:none;">
             <h3>👥 إدارة تلاميذ القسم المختار</h3>
-            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--bg);">
+            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--border);">
                 <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
                 <div style="display: flex; gap:10px;">
                     <input type="file" id="fileInput" accept=".txt" style="flex-grow:1;">
