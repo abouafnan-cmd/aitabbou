@@ -33,7 +33,7 @@ function initDBStructure() {
 }
 initDBStructure();
 
-/* ================== الإشعارات والوضع الليلي والقفل ================== */
+/* ================== الإشعارات والوضع الليلي والقفل ومحرك البحث ================== */
 function showToast(msg) {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -46,11 +46,8 @@ function showToast(msg) {
 function updateThemeIcon() {
     const html = document.documentElement;
     const btn = document.getElementById('themeBtn');
-    if (html.getAttribute('data-theme') === 'dark') {
-        btn.innerText = '☀️';
-    } else {
-        btn.innerText = '🌙';
-    }
+    if (html.getAttribute('data-theme') === 'dark') { btn.innerText = '☀️'; } 
+    else { btn.innerText = '🌙'; }
 }
 
 function toggleTheme() {
@@ -62,27 +59,25 @@ function toggleTheme() {
     updateThemeIcon();
 }
 
-if(localStorage.getItem('appTheme') === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-}
-updateThemeIcon(); // تحديث الأيقونة عند التحميل
+if(localStorage.getItem('appTheme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+updateThemeIcon();
 
 let savedPin = localStorage.getItem('appPin');
 function initPinSystem() {
     const pinScreen = document.getElementById('pinScreen');
-    if(sessionStorage.getItem('pinUnlocked')) {
-        pinScreen.style.display = 'none';
-        return;
-    }
+    if(sessionStorage.getItem('pinUnlocked')) { pinScreen.style.display = 'none'; return; }
     if(!savedPin) {
         document.getElementById('pinTitle').innerText = "🔑 إعداد الحماية لأول مرة";
         document.getElementById('pinHint').innerText = "اختر رمزاً من 4 أرقام لحماية تطبيقك";
     }
 }
+function checkPinLength() {
+    const input = document.getElementById('pinCode').value;
+    if(input.length === 4 && savedPin) processPin();
+}
 function processPin() {
     const input = document.getElementById('pinCode').value;
     if(input.length < 4) return alert("الرمز يجب أن يكون 4 أرقام");
-    
     if(!savedPin) {
         localStorage.setItem('appPin', input);
         savedPin = input;
@@ -101,42 +96,58 @@ function processPin() {
 }
 initPinSystem();
 
+/* محرك البحث الذكي للوائح */
+function filterList(inputId, listId) {
+    const filter = document.getElementById(inputId).value.toLowerCase();
+    const rows = document.getElementById(listId).getElementsByClassName('student-row');
+    for (let i = 0; i < rows.length; i++) {
+        const name = rows[i].getElementsByClassName('student-name')[0].innerText.toLowerCase();
+        if (name.indexOf(filter) > -1) { rows[i].style.display = "flex"; } 
+        else { rows[i].style.display = "none"; }
+    }
+}
+
+/* محرك البحث الذكي للقوائم المنسدلة (Select) */
+function filterDropdown(inputId, selectId, classSelectId) {
+    const filter = document.getElementById(inputId).value.toLowerCase();
+    const select = document.getElementById(selectId);
+    const cls = document.getElementById(classSelectId).value;
+    const currentVal = select.value;
+    
+    if(!cls || !db.students[cls]) return;
+    
+    select.innerHTML = '<option value="">-- اختر التلميذ --</option>';
+    db.students[cls].forEach((s, i) => {
+        if(s.toLowerCase().includes(filter)) {
+            const isSelected = (s === currentVal) ? 'selected' : '';
+            select.innerHTML += `<option value="${s}" ${isSelected}>${i+1} - ${s}</option>`;
+        }
+    });
+    select.style.display = 'block';
+}
+
 /* ================== المزامنة السحابية ================== */
 dbRef.on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        db = data;
-        initDBStructure();
+        db = data; initDBStructure();
         localStorage.setItem('schoolDB', JSON.stringify(db)); 
         const statusEl = document.getElementById('cloudStatus');
-        statusEl.innerText = "☁️ متصل ومُحَدَّث";
-        statusEl.style.color = "#a8e6cf";
-
-        if(isInitialLoad) {
-            init();
-            refreshCurrentView();
-            isInitialLoad = false;
-        } else {
-            refreshCurrentView();
-        }
-    } else {
-        saveToCloud(false);
-    }
+        statusEl.innerText = "☁️ متصل ومُحَدَّث"; statusEl.style.color = "#a8e6cf";
+        if(isInitialLoad) { init(); refreshCurrentView(); isInitialLoad = false; } 
+        else { refreshCurrentView(); }
+    } else { saveToCloud(false); }
 });
 
 function saveToCloud(showAlert = true) {
     localStorage.setItem('schoolDB', JSON.stringify(db)); 
     const statusEl = document.getElementById('cloudStatus');
-    statusEl.innerText = "⏳ جاري الحفظ في السحابة...";
-    statusEl.style.color = "#f1c40f";
-
+    statusEl.innerText = "⏳ جاري الحفظ في السحابة..."; statusEl.style.color = "#f1c40f";
     dbRef.set(db).then(() => {
-        statusEl.innerText = "☁️ تم الحفظ بنجاح";
-        statusEl.style.color = "#a8e6cf";
+        statusEl.innerText = "☁️ تم الحفظ بنجاح"; statusEl.style.color = "#a8e6cf";
         if(showAlert) showToast("تم الحفظ بنجاح!");
     }).catch((error) => {
-        statusEl.innerText = "⚠️ مخزن محلياً فقط";
-        statusEl.style.color = "#e74c3c";
+        statusEl.innerText = "⚠️ مخزن محلياً فقط"; statusEl.style.color = "#e74c3c";
         if(showAlert) alert("تم الحفظ محلياً، وسيتم الرفع عند توفر الإنترنت.");
     });
 }
@@ -186,33 +197,28 @@ function switchTab(tabId) {
 
 /* ================== لوحة التحكم ================== */
 function loadDashboard() {
-    let totalStudents = 0;
-    let classesCount = db.classes.length;
-    let todayAbsences = 0;
+    let totalStudents = 0; let classesCount = db.classes.length; let todayAbsences = 0;
     Object.values(db.students).forEach(arr => totalStudents += arr.length);
     const dStr = today.toISOString().split('T')[0];
     if(db.records[dStr]) {
-        Object.values(db.records[dStr]).forEach(classRec => {
-            todayAbsences += classRec.filter(s => s.attendance === 'غائب').length;
-        });
+        Object.values(db.records[dStr]).forEach(classRec => { todayAbsences += classRec.filter(s => s.attendance === 'غائب').length; });
     }
-    document.getElementById('dashGrid').innerHTML = `
-        <div class="dash-card blue"><h2>${totalStudents}</h2><p>إجمالي التلاميذ</p></div>
-        <div class="dash-card" style="background:var(--secondary);"><h2>${classesCount}</h2><p>الأقسام المسجلة</p></div>
-        <div class="dash-card red"><h2>${todayAbsences}</h2><p>غيابات اليوم</p></div>
-    `;
+    document.getElementById('dashGrid').innerHTML = `<div class="dash-card blue"><h2>${totalStudents}</h2><p>إجمالي التلاميذ</p></div><div class="dash-card" style="background:var(--secondary);"><h2>${classesCount}</h2><p>الأقسام المسجلة</p></div><div class="dash-card red"><h2>${todayAbsences}</h2><p>غيابات اليوم</p></div>`;
 }
 
 /* ================== الملف الشامل ================== */
 function loadPortfolioStudents() {
     const cls = document.getElementById('portClassSelect').value;
     const select = document.getElementById('portStudentSelect');
-    const display = document.getElementById('portfolioDisplay');
-    display.style.display = 'none';
-    if(!cls) { select.style.display = 'none'; return; }
+    const searchInput = document.getElementById('searchPortfolio');
+    document.getElementById('portfolioDisplay').style.display = 'none';
+    searchInput.value = '';
+    
+    if(!cls) { select.style.display = 'none'; searchInput.style.display = 'none'; return; }
+    
     select.innerHTML = '<option value="">-- اختر التلميذ --</option>';
-    db.students[cls].forEach(s => select.innerHTML += `<option value="${s}">${s}</option>`);
-    select.style.display = 'block';
+    db.students[cls].forEach((s, i) => select.innerHTML += `<option value="${s}">${i+1} - ${s}</option>`);
+    select.style.display = 'block'; searchInput.style.display = 'block';
 }
 
 function viewPortfolio() {
@@ -231,11 +237,8 @@ function viewPortfolio() {
     });
 
     let bonus = (db.bonusPoints[cls] && db.bonusPoints[cls][student]) ? db.bonusPoints[cls][student] : 0;
-
     let discHtml = '';
-    Object.values(db.disciplinary).forEach(log => {
-        if(log.class === cls && log.student === student) discHtml += `<div class="note-item">📅 ${log.date} - إجراء مسجل</div>`;
-    });
+    Object.values(db.disciplinary).forEach(log => { if(log.class === cls && log.student === student) discHtml += `<div class="note-item">📅 ${log.date} - إجراء مسجل</div>`; });
 
     let html = `<h2 style="color:var(--title-color); border-bottom:2px solid var(--accent); padding-bottom:10px;">🎓 بطاقة التلميذ(ة): ${student}</h2>`;
     html += `<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
@@ -275,15 +278,19 @@ function loadStudents() {
     const date = document.getElementById('recordDate').value;
     const cls = document.getElementById('classSelect').value;
     const list = document.getElementById('studentsList');
+    document.getElementById('searchTracking').value = ''; // تصفير البحث
     list.innerHTML = '';
-    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align:center;">لا يوجد تلاميذ.</p>';
+    if (!cls || !db.students[cls] || db.students[cls].length === 0) return list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد تلاميذ.</p>';
     const saved = (db.records[date] && db.records[date][cls]) ? db.records[date][cls] : null;
+    
     db.students[cls].forEach((student, index) => {
         let att = "حاضر", prep = "لم ينجز";
         if (saved) { const rec = saved.find(s => s.name === student); if (rec) { att = rec.attendance; prep = rec.preparation; } }
         let bonus = (db.bonusPoints[cls] && db.bonusPoints[cls][student]) ? db.bonusPoints[cls][student] : 0;
+
         list.innerHTML += `<div class="student-row">
-            <div class="student-name"><span class="student-number">${index + 1}</span> ${student}
+            <div class="student-name">
+                <span class="student-number">${index + 1}</span> ${student}
                 <div style="margin-right:auto; display:flex; align-items:center; background:rgba(39, 174, 96, 0.1); padding:2px 8px; border-radius:15px; font-size:0.9rem;">
                     ⭐ نقط: <strong style="margin:0 5px; color:var(--accent); font-size:1.1rem;">${bonus}</strong>
                     <button style="background:var(--accent); color:white; border:none; border-radius:50%; width:25px; height:25px; margin:0 2px;" onclick="updateBonus('${cls}', '${student}', 1)">+</button>
@@ -311,12 +318,13 @@ function saveData() {
     db.records[date][cls] = rec; saveToCloud(true);
 }
 
-/* ================== الفروض المصغرة (تم إصلاحها وتحديثها) ================== */
+/* ================== الفروض المصغرة (تم الإصلاح والتفعيل) ================== */
 function loadMiniExams() {
     const date = document.getElementById('miniExamsDate').value;
     const cls = document.getElementById('miniExamsClassSelect').value;
     const type = document.getElementById('miniExamTypeSelect').value;
     const list = document.getElementById('miniExamsList');
+    document.getElementById('searchMiniExams').value = '';
     list.innerHTML = '';
     
     if (!date || !cls || !type || !db.students[cls] || db.students[cls].length === 0) {
@@ -343,11 +351,11 @@ function saveMiniExams() {
     const date = document.getElementById('miniExamsDate').value;
     const cls = document.getElementById('miniExamsClassSelect').value;
     const type = document.getElementById('miniExamTypeSelect').value;
-    if (!date || !cls || !type) return alert("المرجو إكمال جميع الاختيارات (التاريخ، القسم، نوع الفرض).");
+    if (!date || !cls || !type) return alert("المرجو إكمال جميع الاختيارات.");
 
     if (!db.miniExams[date]) db.miniExams[date] = {};
     if (!db.miniExams[date][cls]) db.miniExams[date][cls] = {};
-    db.miniExams[date][cls][type] = {}; // نهيئ الكائن الخاص بهذا النوع
+    db.miniExams[date][cls][type] = {};
 
     db.students[cls].forEach((student, index) => {
         const val = document.querySelector(`input[name="mx_${index}"]:checked`).value;
@@ -356,7 +364,159 @@ function saveMiniExams() {
     saveToCloud(true);
 }
 
-/* ================== التقارير اليومية والمستمرة (تم الإصلاح والتفعيل) ================== */
+/* ================== الملاحظات الخاصة والحذف ================== */
+function loadNoteStudents() {
+    const cls = document.getElementById('noteClassSelect').value;
+    const select = document.getElementById('noteStudentSelect');
+    const searchInput = document.getElementById('searchNotes');
+    
+    document.getElementById('noteCheckboxesArea').style.display = 'none';
+    document.getElementById('noteHistoryArea').style.display = 'none';
+    document.getElementById('classNotesArea').style.display = 'none';
+    searchInput.value = '';
+    
+    if (!cls || !db.students[cls]) { select.style.display = 'none'; searchInput.style.display = 'none'; return; }
+    
+    select.innerHTML = '<option value="">-- اختر التلميذ --</option>';
+    db.students[cls].forEach((s, i) => select.innerHTML += `<option value="${s}">${i+1} - ${s}</option>`);
+    select.style.display = 'block'; searchInput.style.display = 'block';
+}
+
+function loadStudentHistory() {
+    const date = document.getElementById('noteDate').value;
+    const cls = document.getElementById('noteClassSelect').value;
+    const student = document.getElementById('noteStudentSelect').value;
+    const cbArea = document.getElementById('noteCheckboxesArea');
+    document.getElementById('classNotesArea').style.display = 'none'; 
+    if (!student) { cbArea.style.display = 'none'; document.getElementById('noteHistoryArea').style.display = 'none'; return; }
+    
+    document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => cb.checked = false);
+    if (db.notes[cls] && db.notes[cls][student] && db.notes[cls][student][date]) {
+        const todayNotes = db.notes[cls][student][date];
+        document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => { if (todayNotes.includes(cb.value)) cb.checked = true; });
+    }
+    
+    cbArea.style.display = 'block';
+    const histDiv = document.getElementById('noteHistory');
+    histDiv.innerHTML = '';
+    let hasHistory = false;
+    
+    if (db.notes[cls] && db.notes[cls][student]) {
+        Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
+            const notes = db.notes[cls][student][d];
+            if (notes.length > 0) {
+                hasHistory = true;
+                const isPos = notes.includes("تقديم مشاركة متميزة") || notes.includes("استحقاق نقطة حسنة");
+                // إضافة زر الحذف للملاحظة
+                histDiv.innerHTML += `
+                <div class="note-item ${isPos ? 'positive' : ''}">
+                    <button class="btn-delete-note" title="حذف الملاحظة" onclick="deleteNoteRecord('${cls}', '${student}', '${d}')">🗑️</button>
+                    <strong style="margin-right: 25px;">📅 ${d}</strong><br>
+                    <div style="margin-right: 25px;">- ${notes.join('<br>- ')}</div>
+                </div>`;
+            }
+        });
+    }
+    document.getElementById('studentArchiveTitle').innerText = `أرشيف ملاحظات: ${student}`;
+    document.getElementById('noteHistoryArea').style.display = hasHistory ? 'block' : 'none';
+}
+
+function saveNotes() {
+    const date = document.getElementById('noteDate').value;
+    const cls = document.getElementById('noteClassSelect').value;
+    const student = document.getElementById('noteStudentSelect').value;
+    if (!date || !cls || !student) return alert("المرجو إكمال الاختيارات.");
+    const selectedNotes = Array.from(document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]:checked')).map(cb => cb.value);
+    if (!db.notes[cls]) db.notes[cls] = {};
+    if (!db.notes[cls][student]) db.notes[cls][student] = {};
+    db.notes[cls][student][date] = selectedNotes;
+    saveToCloud(true);
+    loadStudentHistory(); 
+}
+
+function deleteNoteRecord(cls, student, date) {
+    if(confirm(`هل أنت متأكد من حذف الملاحظات المسجلة بتاريخ ${date}؟`)) {
+        delete db.notes[cls][student][date];
+        saveToCloud(false);
+        showToast("تم حذف الملاحظة بنجاح");
+        // تحديث العرض حسب المكان الذي ضغط منه (تلميذ فردي أو قسم كامل)
+        if(document.getElementById('classNotesArea').style.display === 'block') {
+            viewClassNotes();
+        } else {
+            loadStudentHistory();
+        }
+    }
+}
+
+function viewClassNotes() {
+    const cls = document.getElementById('noteClassSelect').value;
+    const classArea = document.getElementById('classNotesArea');
+    const classDiv = document.getElementById('classNotesDisplay');
+    if (!cls) return alert("المرجو اختيار القسم أولاً.");
+    classDiv.innerHTML = '';
+    let hasClassNotes = false;
+    
+    if (db.notes[cls]) {
+        for (let student in db.notes[cls]) {
+            let studentHtml = `<div style="background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px; margin-bottom: 10px; border-right: 4px solid var(--primary);">`;
+            studentHtml += `<h4 style="margin: 0 0 10px 0; color: var(--title-color);">👤 ${student}</h4>`;
+            let hasStudentNotes = false;
+            
+            Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
+                const notes = db.notes[cls][student][d];
+                if (notes.length > 0) {
+                    hasClassNotes = true; hasStudentNotes = true;
+                    const isPos = notes.includes("تقديم مشاركة متميزة") || notes.includes("استحقاق نقطة حسنة");
+                    studentHtml += `
+                    <div class="note-item ${isPos ? 'positive' : ''}" style="margin-left: 10px; margin-right: 10px;">
+                        <button class="btn-delete-note" title="حذف الملاحظة" onclick="deleteNoteRecord('${cls}', '${student}', '${d}')">🗑️</button>
+                        <strong style="margin-right: 25px;">📅 ${d}</strong><br>
+                        <div style="margin-right: 25px;">- ${notes.join('<br>- ')}</div>
+                    </div>`;
+                }
+            });
+            studentHtml += `</div>`;
+            if (hasStudentNotes) classDiv.innerHTML += studentHtml;
+        }
+    }
+    if (!hasClassNotes) classDiv.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
+    classArea.style.display = 'block';
+    document.getElementById('noteCheckboxesArea').style.display = 'none';
+    document.getElementById('noteHistoryArea').style.display = 'none';
+    document.getElementById('noteStudentSelect').value = ""; 
+}
+
+/* ================== المراقبة المستمرة ================== */
+function loadGrades() {
+    const date = document.getElementById('gradesDate').value;
+    const cls = document.getElementById('gradesClassSelect').value;
+    const list = document.getElementById('gradesList');
+    const actions = document.getElementById('gradesActions');
+    document.getElementById('searchGrades').value = '';
+    list.innerHTML = '';
+    if (!cls || !db.students[cls] || db.students[cls].length === 0) { actions.style.display = 'none'; return list.innerHTML = '<p style="text-align: center; color: var(--text-muted);">المرجو اختيار التاريخ والقسم.</p>'; }
+    actions.style.display = 'flex';
+    const saved = (db.grades[date] && db.grades[date][cls]) ? db.grades[date][cls] : {};
+    db.students[cls].forEach((student, index) => {
+        const stdData = saved[student] || { e1: '', e2: '', act: '', avg: '-' };
+        const bonus = (db.bonusPoints[cls] && db.bonusPoints[cls][student]) ? db.bonusPoints[cls][student] : 0;
+        let bgStyle = (parseFloat(stdData.avg) < 10) ? "background: var(--danger); color: white;" : "background: var(--accent); color: white;";
+        if(stdData.avg === '-') bgStyle = "background: var(--secondary); color:white;";
+        
+        list.innerHTML += `<div class="student-row"><div class="student-name">${index + 1}- ${student} <span style="font-size:0.8rem; background:rgba(241, 196, 15, 0.2); color:var(--text); padding:2px 5px; border-radius:3px;">بونص: +${bonus}</span></div>
+            <div class="grades-grid">
+                <div><label>الفرض الأول</label><input type="number" id="e1_${index}" value="${stdData.e1}" oninput="calcAvg(${index})"></div>
+                <div><label>الفرض الثاني</label><input type="number" id="e2_${index}" value="${stdData.e2}" oninput="calcAvg(${index})"></div>
+                <div><label>الأنشطة</label><input type="number" id="act_${index}" value="${stdData.act}" oninput="calcAvg(${index})"></div>
+                <div><label>المعدل العام</label><div class="avg-box" id="avg_${index}" style="${bgStyle}">${stdData.avg}</div></div>
+            </div></div>`;
+    });
+}
+function calcAvg(index) { const e1=parseFloat(document.getElementById(`e1_${index}`).value)||0; const e2=parseFloat(document.getElementById(`e2_${index}`).value)||0; const act=parseFloat(document.getElementById(`act_${index}`).value)||0; const avg=(((e1+e2)/2)*0.75)+(act*0.25); const box = document.getElementById(`avg_${index}`); box.innerText=avg.toFixed(2); box.style.background=avg<10?'var(--danger)':'var(--accent)'; }
+function saveGrades() { const date = document.getElementById('gradesDate').value; const cls = document.getElementById('gradesClassSelect').value; if (!date || !cls) return; if (!db.grades[date]) db.grades[date] = {}; db.grades[date][cls] = {}; db.students[cls].forEach((student, index) => { db.grades[date][cls][student] = { e1: document.getElementById(`e1_${index}`).value, e2: document.getElementById(`e2_${index}`).value, act: document.getElementById(`act_${index}`).value, avg: document.getElementById(`avg_${index}`).innerText }; }); saveToCloud(true); }
+function shareGrades(type) { /* الكود السابق */ }
+
+/* ================== التقارير الشاملة المحدثة ================== */
 function viewReport() {
     const reportType = document.getElementById('reportTypeSelect').value;
     const date = document.getElementById('reportDate').value;
@@ -367,7 +527,6 @@ function viewReport() {
 
     if (!selClass || !reportType) { display.style.display = 'none'; actions.style.display = 'none'; return; }
     
-    // إخفاء التاريخ في التقارير التراكمية
     dateInput.style.display = (reportType === 'tracking' || reportType === 'miniExams') ? 'block' : 'none';
     
     display.innerHTML = ''; currentReportText = '';
@@ -386,26 +545,26 @@ function viewReport() {
         const absentees = records.filter(s => s.attendance === "غائب").map(formatName);
         const late = records.filter(s => s.attendance === "متأخر").map(formatName);
 
-        let html = `<h4>🗓️ تتبع الحضور والإعداد: ${selClass} (${date})</h4><ul>`;
+        let html = `<h4 style="color:var(--title-color);">🗓️ تتبع الحضور والإعداد: ${selClass} (${date})</h4><ul style="color:var(--text);">`;
         html += `<li><strong>إنجاز جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
         html += `<li><strong>إنجاز متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
         html += `<li><strong>إنجاز ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li></ul>`;
-        html += `<strong>❌ لم ينجزوا (${noPrep.length}):</strong><br> ${noPrep.join('، ') || '-'}<br><br>`;
-        html += `<strong>🚫 المتغيبون (${absentees.length}):</strong><br> ${absentees.join('، ') || '-'}<br><br>`;
-        html += `<strong>⏳ المتأخرون (${late.length}):</strong><br> ${late.join('، ') || '-'}`;
+        html += `<strong style="color:var(--danger);">❌ لم ينجزوا (${noPrep.length}):</strong><br> <span style="color:var(--text);">${noPrep.join('، ') || '-'}</span><br><br>`;
+        html += `<strong style="color:var(--danger);">🚫 المتغيبون (${absentees.length}):</strong><br> <span style="color:var(--text);">${absentees.join('، ') || '-'}</span><br><br>`;
+        html += `<strong style="color:#f39c12;">⏳ المتأخرون (${late.length}):</strong><br> <span style="color:var(--text);">${late.join('، ') || '-'}</span>`;
         display.innerHTML = html;
         currentReportText = `*تقرير الإعداد والحضور: ${selClass} (${date})*\n\n*المنجزون للإعداد:*\n- جيد: ${prepGood.join('، ') || '-'}\n- متوسط: ${prepMed.join('، ') || '-'}\n- ضعيف: ${prepWeak.join('، ') || '-'}\n\n*لم ينجزوا:*\n${noPrep.join('، ') || 'لا يوجد'}\n\n*الغياب:*\n${absentees.join('، ') || 'لا يوجد'}\n\n*التأخر:*\n${late.join('، ') || 'لا يوجد'}`;
         display.style.display = 'block'; actions.style.display = 'flex';
     } 
     else if (reportType === 'notes') {
         if (!db.notes[selClass] || Object.keys(db.notes[selClass]).length === 0) {
-            display.innerHTML = '<p style="text-align:center;">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
+            display.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد ملاحظات مسجلة لتلاميذ هذا القسم.</p>';
             display.style.display = 'block'; actions.style.display = 'none'; return;
         } 
-        let html = `<h4>📝 تقرير الملاحظات الخاصة: ${selClass}</h4>`;
+        let html = `<h4 style="color:var(--title-color);">📝 تقرير الملاحظات الخاصة: ${selClass}</h4>`;
         let txt = `*تقرير الملاحظات الخاصة*\n*القسم:* ${selClass}\n\n`;
         for (let student in db.notes[selClass]) {
-            let studentHtml = `<div style="margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;"><strong>👤 ${student}:</strong><ul>`;
+            let studentHtml = `<div style="margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;"><strong style="color:var(--title-color);">👤 ${student}:</strong><ul style="color:var(--text);">`;
             let hasNotes = false;
             Object.keys(db.notes[selClass][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
                 const notes = db.notes[selClass][student][d];
@@ -421,14 +580,14 @@ function viewReport() {
         let allLogs = [];
         for(let d in db.lessonLog) { if(db.lessonLog[d][selClass]) { db.lessonLog[d][selClass].forEach(log => allLogs.push({ date: d, ...log })); } }
         if (allLogs.length === 0) { 
-            display.innerHTML = '<p style="text-align:center;">لا توجد دروس مسجلة لهذا القسم.</p>'; 
+            display.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد دروس مسجلة لهذا القسم.</p>'; 
             display.style.display = 'block'; actions.style.display = 'none'; return;
         } 
         allLogs.sort((a,b) => new Date(b.date) - new Date(a.date));
-        let html = `<h4>📘 دفتر النصوص التراكمي: ${selClass}</h4>`;
+        let html = `<h4 style="color:var(--title-color);">📘 دفتر النصوص التراكمي: ${selClass}</h4>`;
         let txt = `*دفتر النصوص التراكمي*\n*القسم:* ${selClass}\n\n`;
         allLogs.forEach(log => {
-            html += `<div style="border-right: 4px solid var(--primary); background:rgba(128,128,128,0.05); padding: 10px; margin-bottom: 10px;">`;
+            html += `<div style="border-right: 4px solid var(--primary); background:rgba(128,128,128,0.05); padding: 10px; margin-bottom: 10px; color:var(--text);">`;
             html += `<strong style="color:var(--accent);">📅 ${log.date} | ${log.component}</strong><br>`;
             txt += `📅 *${log.date}* | ${log.component}\n`;
             if (log.component === 'النصوص') {
@@ -456,14 +615,13 @@ function viewReport() {
             display.style.display = 'block'; actions.style.display = 'none'; return; 
         }
         
-        let html = `<h4>📝 تقرير الفروض المصغرة: ${selClass} (${date})</h4>`;
+        let html = `<h4 style="color:var(--title-color);">📝 تقرير الفروض المصغرة: ${selClass} (${date})</h4>`;
         let txt = `*تقرير الفروض المصغرة: ${selClass} (${date})*\n\n`;
         const dayExams = db.miniExams[date][selClass];
         
-        // استعراض جميع أنواع الفروض المنجزة في ذلك اليوم
         for(let type in dayExams) {
             html += `<h5 style="color:var(--accent); margin-bottom:5px;">📌 نشاط: ${type}</h5>`;
-            html += `<table style="width:100%; border-collapse: collapse; margin-bottom:15px; border: 1px solid var(--border);">`;
+            html += `<table style="width:100%; border-collapse: collapse; margin-bottom:15px; border: 1px solid var(--border); color:var(--text);">`;
             html += `<tr style="background:var(--primary); color:white;"><th style="padding:8px; border:1px solid var(--border);">التلميذ</th><th style="padding:8px; border:1px solid var(--border);">التقييم</th></tr>`;
             txt += `📌 نشاط: ${type}\n`;
             
@@ -503,17 +661,7 @@ function printPDFReport() {
     window.print();
 }
 
-/* ================== دوال فرعية للعمليات (تم اختصارها للحفاظ على الهيكل العام) ================== */
-function loadNoteStudents() { const cls = document.getElementById('noteClassSelect').value; const sel = document.getElementById('noteStudentSelect'); sel.innerHTML = '<option value="">-- اختر التلميذ --</option>'; if(db.students[cls]) db.students[cls].forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`); sel.style.display = 'block'; document.getElementById('noteCheckboxesArea').style.display = 'none'; }
-function loadStudentHistory() { const cls = document.getElementById('noteClassSelect').value; const student = document.getElementById('noteStudentSelect').value; const cbArea = document.getElementById('noteCheckboxesArea'); document.getElementById('classNotesArea').style.display='none'; if(!student) return cbArea.style.display='none'; document.querySelectorAll('#noteCheckboxesArea input').forEach(c=>c.checked=false); cbArea.style.display='block'; const histDiv = document.getElementById('noteHistory'); histDiv.innerHTML=''; if(db.notes[cls] && db.notes[cls][student]) { Object.keys(db.notes[cls][student]).forEach(d => { const n = db.notes[cls][student][d]; if(n.length>0) histDiv.innerHTML += `<div class="note-item"><strong>${d}</strong><br>- ${n.join('<br>- ')}</div>`; }); } document.getElementById('noteHistoryArea').style.display='block'; }
-function saveNotes() { const date = document.getElementById('noteDate').value; const cls = document.getElementById('noteClassSelect').value; const student = document.getElementById('noteStudentSelect').value; const notes = Array.from(document.querySelectorAll('#noteCheckboxesArea input:checked')).map(c=>c.value); if(!db.notes[cls]) db.notes[cls]={}; if(!db.notes[cls][student]) db.notes[cls][student]={}; db.notes[cls][student][date] = notes; saveToCloud(true); loadStudentHistory(); }
-function viewClassNotes() { const cls = document.getElementById('noteClassSelect').value; const classDiv = document.getElementById('classNotesDisplay'); classDiv.innerHTML = ''; if(db.notes[cls]) { for(let s in db.notes[cls]) { let sHtml = `<h4 style="color:var(--title-color);">${s}</h4>`; Object.keys(db.notes[cls][s]).forEach(d => { if(db.notes[cls][s][d].length>0) sHtml+=`<div class="note-item">${d}: ${db.notes[cls][s][d].join(', ')}</div>`; }); classDiv.innerHTML += sHtml; } } document.getElementById('classNotesArea').style.display='block'; }
-
-function loadGrades() { const date = document.getElementById('gradesDate').value; const cls = document.getElementById('gradesClassSelect').value; const list = document.getElementById('gradesList'); list.innerHTML = ''; if (!cls || !db.students[cls]) return; db.students[cls].forEach((student, index) => { const stdData = (db.grades[date] && db.grades[date][cls] && db.grades[date][cls][student]) ? db.grades[date][cls][student] : { e1: '', e2: '', act: '', avg: '-' }; const bonus = (db.bonusPoints[cls] && db.bonusPoints[cls][student]) ? db.bonusPoints[cls][student] : 0; let bgStyle = (parseFloat(stdData.avg) < 10) ? "background: var(--danger); color: white;" : "background: var(--accent); color: white;"; if(stdData.avg === '-') bgStyle = "background: var(--secondary); color:white;"; list.innerHTML += `<div class="student-row"><div class="student-name">${index + 1}- ${student} <span style="font-size:0.8rem; background:rgba(241, 196, 15, 0.2); color:var(--text); padding:2px 5px; border-radius:3px;">بونص: +${bonus}</span></div><div class="grades-grid"><div><label>الفرض الأول</label><input type="number" id="e1_${index}" value="${stdData.e1}" oninput="calcAvg(${index})"></div><div><label>الفرض الثاني</label><input type="number" id="e2_${index}" value="${stdData.e2}" oninput="calcAvg(${index})"></div><div><label>الأنشطة</label><input type="number" id="act_${index}" value="${stdData.act}" oninput="calcAvg(${index})"></div><div><label>المعدل العام</label><div class="avg-box" id="avg_${index}" style="${bgStyle}">${stdData.avg}</div></div></div></div>`; }); document.getElementById('gradesActions').style.display='flex';}
-function calcAvg(index) { const e1=parseFloat(document.getElementById(`e1_${index}`).value)||0; const e2=parseFloat(document.getElementById(`e2_${index}`).value)||0; const act=parseFloat(document.getElementById(`act_${index}`).value)||0; const avg=(((e1+e2)/2)*0.75)+(act*0.25); const box = document.getElementById(`avg_${index}`); box.innerText=avg.toFixed(2); box.style.background=avg<10?'var(--danger)':'var(--accent)'; }
-function saveGrades() { const date = document.getElementById('gradesDate').value; const cls = document.getElementById('gradesClassSelect').value; if (!date || !cls) return; if (!db.grades[date]) db.grades[date] = {}; db.grades[date][cls] = {}; db.students[cls].forEach((student, index) => { db.grades[date][cls][student] = { e1: document.getElementById(`e1_${index}`).value, e2: document.getElementById(`e2_${index}`).value, act: document.getElementById(`act_${index}`).value, avg: document.getElementById(`avg_${index}`).innerText }; }); saveToCloud(true); }
-function shareGrades(type) { /* الكود السابق */ }
-
+/* ================== دوال فرعية لم تتغير (القرعة، الإجراءات، دفتر النصوص) ================== */
 function loadDiscStudents() { const cls = document.getElementById('discClassSelect').value; const sel = document.getElementById('discStudentSelect'); const up = document.getElementById('discUploadArea'); if (!cls || !db.students[cls]) { sel.style.display = 'none'; up.style.display = 'none'; return; } sel.innerHTML = '<option value="">-- اختر التلميذ --</option>'; db.students[cls].forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`); sel.style.display = 'block'; sel.onchange = () => { up.style.display = sel.value ? 'block' : 'none'; }; }
 function saveDisciplinary() { const date = document.getElementById('discDate').value; const cls = document.getElementById('discClassSelect').value; const student = document.getElementById('discStudentSelect').value; const fileInput = document.getElementById('discPdfFile'); if (!date || !cls || !student || !fileInput.files.length) return alert("أكمل البيانات المرفقة."); const file = fileInput.files[0]; if (file.size > 2 * 1024 * 1024) return alert("الـ PDF يتجاوز 2 ميغابايت."); const reader = new FileReader(); reader.onload = function(e) { db.disciplinary[Date.now()] = { date: date, class: cls, student: student, pdfData: e.target.result }; saveToCloud(true); document.getElementById('discStudentSelect').value = ''; fileInput.value = ''; document.getElementById('discUploadArea').style.display = 'none'; viewDisciplinary(); }; reader.readAsDataURL(file); }
 function viewDisciplinary() { const filterCls = document.getElementById('discFilterClass').value; const display = document.getElementById('discArchiveDisplay'); display.innerHTML = ''; if (!db.disciplinary || Object.keys(db.disciplinary).length === 0) return display.innerHTML = '<p style="color:var(--text-muted); text-align:center;">لا توجد إجراءات.</p>'; let logs = Object.values(db.disciplinary).sort((a,b) => new Date(b.date) - new Date(a.date)); if (filterCls) logs = logs.filter(l => l.class === filterCls); logs.forEach(log => { const id = Object.keys(db.disciplinary).find(k => db.disciplinary[k] === log); display.innerHTML += `<div class="log-entry" style="border-color:var(--danger);"><button class="delete-log" onclick="deleteDisciplinary('${id}')">حذف</button><h4 style="color:var(--danger);">👤 ${log.student}</h4><p style="color:var(--text);">القسم: ${log.class} | التاريخ: ${log.date}</p><button class="btn-primary" onclick="downloadPDF('${id}')">📄 تحميل التقرير</button></div>`; }); }
@@ -530,6 +678,7 @@ function saveLessonLog() { const date = document.getElementById('lessonDate').va
 function viewLessonLog() { const date = document.getElementById('lessonDate').value; const cls = document.getElementById('lessonClassSelect').value; const area = document.getElementById('lessonDisplayArea'); const display = document.getElementById('lessonLogDisplay'); if (!date || !cls || !db.lessonLog[date] || !db.lessonLog[date][cls] || db.lessonLog[date][cls].length === 0) { area.style.display = 'none'; return; } const logs = db.lessonLog[date][cls]; let html = ''; logs.forEach(log => { html += `<div class="log-entry"><button class="delete-log" onclick="deleteLessonLog(${log.id})">حذف</button><h4 style="color:var(--title-color);">📘 المكون: ${log.component}</h4>`; if (log.component === 'النصوص') { if(log.details.title) html += `<strong style="color:var(--text);">العنوان:</strong> <span style="color:var(--text);">${log.details.title}</span><br>`; if(log.details.session1 && log.details.session1.length > 0) html += `<strong style="color:var(--text);">الحصة الأولى:</strong><ul style="color:var(--text);"><li>${log.details.session1.join('</li><li>')}</li></ul>`; if(log.details.analysis && log.details.analysis.length > 0) html += `<strong style="color:var(--text);">الحصة الثانية (تحليل):</strong><ul style="color:var(--text);"><li>${log.details.analysis.join('</li><li>')}</li></ul>`; if(log.details.session2_end && log.details.session2_end.length > 0) html += `<strong style="color:var(--text);">خواتيم:</strong><ul style="color:var(--text);"><li>${log.details.session2_end.join('</li><li>')}</li></ul>`; } else if (log.component === 'الدرس اللغوي') { html += `<strong style="color:var(--text);">الظاهرة اللغوية:</strong> <span style="color:var(--text);">${log.details.title || 'لم يحدد'}</span><br>`; } else if (log.component === 'التعبير والإنشاء') { if(log.details.title) html += `<strong style="color:var(--text);">المهارة:</strong> <span style="color:var(--text);">${log.details.title}</span><br>`; if(log.details.steps && log.details.steps.length > 0) html += `<strong style="color:var(--text);">النشاط:</strong><ul style="color:var(--text);"><li>${log.details.steps.join('</li><li>')}</li></ul>`; } else if (log.component === 'المؤلفات') { if(log.details.steps && log.details.steps.length > 0) html += `<strong style="color:var(--text);">القراءة:</strong><ul style="color:var(--text);"><li>${log.details.steps.join('</li><li>')}</li></ul>`; if(log.details.content) html += `<strong style="color:var(--text);">المحتوى المنجز:</strong><p style="margin-top:5px; background:var(--card-bg); color:var(--text); padding:10px; border-radius:4px;">${log.details.content}</p>`; } html += `</div>`; }); display.innerHTML = html; area.style.display = 'block'; }
 function deleteLessonLog(id) { if(!confirm("هل أنت متأكد من حذف هذا السجل؟")) return; const date = document.getElementById('lessonDate').value; const cls = document.getElementById('lessonClassSelect').value; db.lessonLog[date][cls] = db.lessonLog[date][cls].filter(log => log.id !== id); saveToCloud(false); viewLessonLog(); }
 
+/* ================== الإدارة ================== */
 function addClass() { const name = document.getElementById('newClassName').value.trim(); if (!name) return alert("المرجو إدخال اسم القسم."); if (db.classes.includes(name)) return alert("موجود مسبقاً!"); db.classes.push(name); db.students[name] = []; document.getElementById('newClassName').value = ""; init(); saveToCloud(true); }
 function deleteClass() { const selClass = document.getElementById('manageClassSelect').value; if (!selClass) return alert("المرجو اختيار قسم."); if (confirm(`حذف قسم "${selClass}" بالكامل؟`)) { db.classes = db.classes.filter(c => c !== selClass); delete db.students[selClass]; init(); document.getElementById('studentManagementArea').style.display = 'none'; saveToCloud(true); } }
 function renderStudentManagement() { const selClass = document.getElementById('manageClassSelect').value; const area = document.getElementById('studentManagementArea'); const list = document.getElementById('manageStudentList'); if (!selClass) { area.style.display = 'none'; return; } area.style.display = 'block'; list.innerHTML = ''; if (!db.students[selClass]) db.students[selClass] = []; db.students[selClass].forEach((student, index) => { list.innerHTML += `<li><span style="color:var(--text);"><span class="student-number">${index + 1}</span> - ${student}</span><button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteStudent('${selClass}', ${index})">حذف</button></li>`; }); }

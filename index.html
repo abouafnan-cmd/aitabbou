@@ -34,6 +34,10 @@
         
         .container { padding: 20px; max-width: 900px; margin: auto; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        
+        /* تصميم حقل البحث الذكي */
+        .search-bar { flex-grow: 1; min-width: 100%; border: 2px solid var(--accent) !important; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2327ae60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat; background-position: right 10px center; padding-right: 35px !important; }
+        
         select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], input[type="password"], textarea { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem; background-color: var(--input-bg); color: var(--text); }
         select, input[type="text"], textarea { flex-grow: 1; min-width: 200px;}
         textarea { resize: vertical; min-height: 80px;}
@@ -45,7 +49,7 @@
         button.btn-download { background-color: #3498db; }
         button.btn-excel { background-color: var(--excel); }
         
-        .student-row { background: var(--card-bg); padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--accent);}
+        .student-row { background: var(--card-bg); padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--accent); transition: 0.2s;}
         .student-name { font-weight: bold; font-size: 1.2rem; color: var(--title-color); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
         .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
         .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px;}
@@ -64,6 +68,11 @@
         
         #reportDisplay, #noteHistory, #classNotesDisplay, #portfolioDisplay { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
         
+        /* تصميم الملاحظات وزر الحذف */
+        .note-item { background: rgba(231, 76, 60, 0.05); border-right: 4px solid var(--danger); padding: 10px; margin-bottom: 10px; border-radius: 4px; position: relative;}
+        .note-item.positive { background: rgba(46, 204, 113, 0.05); border-color: var(--accent); }
+        .btn-delete-note { position: absolute; left: 10px; top: 10px; background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; padding: 0; }
+        
         .manage-list { list-style: none; padding: 0; margin: 0;}
         .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: rgba(128,128,128,0.05); margin-bottom: 5px; border-radius: 4px;}
         
@@ -71,14 +80,21 @@
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
         .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
         
-        #pinScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;}
-        #pinScreen h2 { margin-bottom: 20px; font-size: 2rem; color: white;}
-        .pin-inputs { display: flex; gap: 10px; margin-bottom: 20px;}
-        .pin-inputs input { width: 50px; height: 50px; font-size: 2rem; text-align: center; border-radius: 10px; border: none; background: white; color: black;}
+        /* واجهة الدخول الأنيقة (PIN) */
+        #pinScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #2c3e50, #3498db); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;}
+        .pin-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; border: 1px solid rgba(255,255,255,0.2); width: 80%; max-width: 350px;}
+        .pin-card h2 { color: white; font-size: 1.8rem; margin-bottom: 10px; }
+        .pin-card p { color: #d1d8e0; margin-bottom: 25px; font-size: 0.9rem;}
+        .pin-input-container { display: flex; justify-content: center; margin-bottom: 25px;}
+        .pin-input-container input { width: 100%; letter-spacing: 25px; font-size: 2.5rem; text-align: center; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.9); color: #2c3e50; padding: 15px 0;}
+        .pin-input-container input:focus { outline: none; border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+        .pin-icon { font-size: 3rem; margin-bottom: 15px; }
         
+        /* الإشعارات الذكية */
         #toastContainer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px;}
         .toast { background: var(--accent); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; animation: slideUp 0.3s, fadeOut 0.5s 2.5s forwards; }
         
+        /* لوحة التحكم */
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
         .dash-card { background: var(--accent); color: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
         .dash-card h2 { margin: 0; font-size: 2.5rem; color: white;}
@@ -100,12 +116,15 @@
 <body>
 
 <div id="pinScreen">
-    <h2 id="pinTitle">🔒 أدخل الرمز السري</h2>
-    <div style="margin-bottom: 15px; color: #a8e6cf; font-size: 0.9rem;" id="pinHint"></div>
-    <div class="pin-inputs">
-        <input type="password" id="pinCode" maxlength="4" placeholder="****" style="width: 150px; letter-spacing: 15px;">
+    <div class="pin-card">
+        <div class="pin-icon">💼</div>
+        <h2 id="pinTitle">مرحباً أستاذي</h2>
+        <p id="pinHint">المرجو إدخال الرمز السري للمتابعة</p>
+        <div class="pin-input-container">
+            <input type="password" id="pinCode" maxlength="4" placeholder="••••" oninput="checkPinLength()">
+        </div>
+        <button class="btn-primary" style="width: 100%; font-size: 1.1rem;" onclick="processPin()">تأكيد الدخول</button>
     </div>
-    <button class="btn-primary" style="padding: 10px 40px; font-size: 1.2rem;" onclick="processPin()">دخول</button>
 </div>
 
 <div id="toastContainer"></div>
@@ -143,7 +162,8 @@
         <div class="controls">
             <input type="date" id="recordDate" onchange="loadStudents()">
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
-            <button class="btn-primary" onclick="saveData()">💾 حفظ التتبع</button>
+            <input type="text" class="search-bar" id="searchTracking" placeholder="🔍 بحث سريع عن تلميذ..." onkeyup="filterList('searchTracking', 'studentsList')">
+            <button class="btn-primary" style="width: 100%;" onclick="saveData()">💾 حفظ التتبع</button>
         </div>
         <div id="studentsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
@@ -153,6 +173,7 @@
             <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📁 الملف الشامل للتلميذ</h3>
             <div class="controls">
                 <select id="portClassSelect" onchange="loadPortfolioStudents()"><option value="">-- اختر القسم --</option></select>
+                <input type="text" class="search-bar" id="searchPortfolio" placeholder="🔍 ابحث واكتب اسم التلميذ هنا..." onkeyup="filterDropdown('searchPortfolio', 'portStudentSelect', 'portClassSelect')">
                 <select id="portStudentSelect" onchange="viewPortfolio()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
             <div id="portfolioDisplay" style="display:none;"></div>
@@ -311,9 +332,10 @@
                 <option value="تقويم مرحلي">تقويم مرحلي</option>
                 <option value="تقويم تشخيصي">تقويم تشخيصي</option>
             </select>
-            <button class="btn-primary" onclick="saveMiniExams()">💾 حفظ الفروض المصغرة</button>
+            <input type="text" class="search-bar" id="searchMiniExams" placeholder="🔍 بحث سريع عن تلميذ..." onkeyup="filterList('searchMiniExams', 'miniExamsList')">
+            <button class="btn-primary" style="width: 100%;" onclick="saveMiniExams()">💾 حفظ الفروض المصغرة</button>
         </div>
-        <div id="miniExamsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم ونوع الفرض.</p></div>
+        <div id="miniExamsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو إكمال الاختيارات أعلاه.</p></div>
     </div>
 
     <div id="notesTab" class="section">
@@ -322,6 +344,7 @@
             <div class="controls">
                 <input type="date" id="noteDate" onchange="loadNoteStudents()">
                 <select id="noteClassSelect" onchange="loadNoteStudents()"><option value="">-- اختر القسم --</option></select>
+                <input type="text" class="search-bar" id="searchNotes" placeholder="🔍 ابحث واكتب اسم التلميذ هنا..." onkeyup="filterDropdown('searchNotes', 'noteStudentSelect', 'noteClassSelect')">
                 <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
             
@@ -357,7 +380,8 @@
         <div class="controls">
             <input type="date" id="gradesDate" onchange="loadGrades()">
             <select id="gradesClassSelect" onchange="loadGrades()"><option value="">-- اختر القسم --</option></select>
-            <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
+            <input type="text" class="search-bar" id="searchGrades" placeholder="🔍 بحث سريع عن تلميذ..." onkeyup="filterList('searchGrades', 'gradesList')">
+            <button class="btn-primary" style="width: 100%;" onclick="saveGrades()">💾 حفظ النقط</button>
         </div>
         <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <strong style="width: 100%; color: var(--title-color);">تصدير اللائحة:</strong>
