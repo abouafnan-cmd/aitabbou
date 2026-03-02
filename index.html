@@ -9,23 +9,24 @@
     <style>
         :root {
             --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60;
-            --bg: #f4f7f6; --card-bg: #ffffff; --text: #333; --border: #ddd;
-            --danger: #e74c3c; --telegram: #0088cc; --excel: #217346;
+            --bg: #f4f7f6; --card-bg: #ffffff; --text: #333; --text-muted: #777;
+            --border: #ddd; --danger: #e74c3c; --telegram: #0088cc; --excel: #217346;
             --log-bg: #e8f4f8; --rand: #9b59b6; --input-bg: #fff;
+            --title-color: #2c3e50; --highlight-bg: #fdf2e9;
         }
         [data-theme="dark"] {
             --primary: #1a252f; --secondary: #2c3e50; --accent: #2ecc71;
-            --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; --border: #444;
-            --danger: #c0392b; --log-bg: #2c3e50; --input-bg: #333;
+            --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; --text-muted: #aaa;
+            --border: #444; --danger: #e74c3c; --log-bg: #2c3e50; --input-bg: #333;
+            --title-color: #a8e6cf; --highlight-bg: #3e2723;
         }
 
         body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
         header { background-color: var(--primary); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative;}
         header h1 { margin: 0; font-size: 1.5rem; }
         #cloudStatus { font-size: 0.85rem; margin-top: 8px; font-weight: bold; transition: color 0.3s; }
-        .theme-toggle { position: absolute; top: 15px; left: 15px; background: none; border: 1px solid white; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .theme-toggle { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
         
-        /* جعل القائمة قابلة للتمرير في الهواتف */
         nav { display: flex; background: var(--secondary); padding: 0.5rem; gap: 5px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
         nav::-webkit-scrollbar { display: none; }
         nav button { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 0.9rem; flex-shrink: 0; transition: 0.3s;}
@@ -44,14 +45,14 @@
         button.btn-download { background-color: #3498db; }
         button.btn-excel { background-color: var(--excel); }
         
-        .student-row { background: var(--card-bg); padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--primary);}
-        .student-name { font-weight: bold; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
+        .student-row { background: var(--card-bg); padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--accent);}
+        .student-name { font-weight: bold; font-size: 1.2rem; color: var(--title-color); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
         .student-number { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;}
-        .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 5px;}
-        .options-group strong { min-width: 80px; font-size: 0.95rem; width: 100%;}
+        .options-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px;}
+        .options-group strong { min-width: 80px; font-size: 0.95rem; width: 100%; color: var(--title-color);}
         .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--card-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);}
         
-        .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 5px;}
+        .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
         .grades-grid input { padding: 8px; text-align: center;}
         .avg-box { background: var(--secondary); color: white; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: background 0.3s;}
@@ -59,31 +60,28 @@
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
         .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
-        .card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px;}
+        h2, h3, h4 { color: var(--title-color); margin-top: 0; }
+        
         #reportDisplay, #noteHistory, #classNotesDisplay, #portfolioDisplay { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; line-height: 1.8;}
         
         .manage-list { list-style: none; padding: 0; margin: 0;}
-        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: rgba(0,0,0,0.02); margin-bottom: 5px; border-radius: 4px;}
+        .manage-list li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; background: rgba(128,128,128,0.05); margin-bottom: 5px; border-radius: 4px;}
         
-        .log-entry { background: var(--log-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--primary); position: relative;}
-        .log-entry h4 { margin: 0 0 10px 0; color: var(--primary); }
+        .log-entry { background: var(--log-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--accent); position: relative;}
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
         .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
         
-        /* شاشة القفل */
         #pinScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;}
-        #pinScreen h2 { margin-bottom: 20px; font-size: 2rem;}
+        #pinScreen h2 { margin-bottom: 20px; font-size: 2rem; color: white;}
         .pin-inputs { display: flex; gap: 10px; margin-bottom: 20px;}
-        .pin-inputs input { width: 50px; height: 50px; font-size: 2rem; text-align: center; border-radius: 10px; border: none; }
+        .pin-inputs input { width: 50px; height: 50px; font-size: 2rem; text-align: center; border-radius: 10px; border: none; background: white; color: black;}
         
-        /* الإشعارات الذكية */
         #toastContainer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px;}
         .toast { background: var(--accent); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; animation: slideUp 0.3s, fadeOut 0.5s 2.5s forwards; }
         
-        /* لوحة التحكم */
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
         .dash-card { background: var(--accent); color: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
-        .dash-card h2 { margin: 0; font-size: 2.5rem; }
+        .dash-card h2 { margin: 0; font-size: 2.5rem; color: white;}
         .dash-card p { margin: 5px 0 0 0; font-size: 1rem; opacity: 0.9;}
         .dash-card.blue { background: #3498db; }
         .dash-card.red { background: #e74c3c; }
@@ -92,10 +90,9 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
-        /* تنسيقات الطباعة */
         @media print {
             body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
+            #printArea, #printArea * { visibility: visible; color: black !important; }
             #printArea { position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
@@ -115,8 +112,8 @@
 
 <header>
     <h1>دفتر الأستاذ الرقمي</h1>
-    <div id="cloudStatus" style="color: #f1c40f;">⏳ جاري الاتصال...</div>
-    <button class="theme-toggle" onclick="toggleTheme()">🌙 ليلي / نهاري</button>
+    <div id="cloudStatus">⏳ جاري الاتصال...</div>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
 </header>
 <nav>
     <button class="active" onclick="switchTab('dashboardTab')">📊 لوحة التحكم</button>
@@ -124,7 +121,7 @@
     <button onclick="switchTab('portfolioTab')">📁 ملف التلميذ</button>
     <button onclick="switchTab('lessonLogTab')">دفتر النصوص</button>
     <button onclick="switchTab('notesTab')">ملاحظات خاصة</button>
-    <button onclick="switchTab('disciplinaryTab')" style="background-color: #c0392b; color: white;">إجراءات تأديبية</button>
+    <button onclick="switchTab('disciplinaryTab')" style="background-color: var(--danger); color: white;">إجراءات تأديبية</button>
     <button onclick="switchTab('miniExamsTab')">الفروض</button>
     <button onclick="switchTab('gradesTab')">المراقبة المستمرة</button>
     <button onclick="switchTab('randomizerTab')">القرعة</button>
@@ -136,13 +133,9 @@
 
     <div id="dashboardTab" class="section active">
         <div class="card">
-            <h3>مرحباً بك أستاذي الكريم 🌟</h3>
-            <p style="color: #777;">نظرة عامة على إحصائيات الأقسام:</p>
-            <div class="dash-grid" id="dashGrid">
-                <div class="dash-card blue"><h2>0</h2><p>إجمالي التلاميذ</p></div>
-                <div class="dash-card"><h2>0</h2><p>الأقسام المسجلة</p></div>
-                <div class="dash-card red"><h2>0</h2><p>غيابات اليوم</p></div>
-            </div>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">مرحباً بك أستاذي الكريم 🌟</h3>
+            <p style="color: var(--text-muted);">نظرة عامة على إحصائيات الأقسام:</p>
+            <div class="dash-grid" id="dashGrid"></div>
         </div>
     </div>
 
@@ -152,12 +145,12 @@
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
             <button class="btn-primary" onclick="saveData()">💾 حفظ التتبع</button>
         </div>
-        <div id="studentsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+        <div id="studentsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
     <div id="portfolioTab" class="section">
         <div class="card">
-            <h3>📁 الملف الشامل للتلميذ</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📁 الملف الشامل للتلميذ</h3>
             <div class="controls">
                 <select id="portClassSelect" onchange="loadPortfolioStudents()"><option value="">-- اختر القسم --</option></select>
                 <select id="portStudentSelect" onchange="viewPortfolio()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
@@ -168,8 +161,8 @@
 
     <div id="disciplinaryTab" class="section">
         <div class="card" style="border: 1px solid var(--danger);">
-            <h3 style="color: var(--danger); border-bottom-color: var(--border);">⚖️ اتخاذ إجراء تأديبي</h3>
-            <p style="font-size: 0.95rem; line-height: 1.6; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+            <h3 style="color: var(--danger); border-bottom: 1px solid var(--border); padding-bottom: 10px;">⚖️ اتخاذ إجراء تأديبي</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">
                 صفحة خاصة باستعراض التلميذات والتلاميذ الذي اتخذت فيهم إجراءات تأديبية، وكتب في حقهم تقرير تأديبي إلى الإدارة.
             </p>
             <div class="controls" style="margin-top: 15px;">
@@ -184,7 +177,7 @@
             </div>
         </div>
         <div class="card">
-            <h3 style="color: var(--primary);">🗂️ سجل الإجراءات التأديبية المتخذة</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">🗂️ سجل الإجراءات التأديبية المتخذة</h3>
             <div class="controls">
                 <select id="discFilterClass" onchange="viewDisciplinary()"><option value="">-- عرض جميع الأقسام --</option></select>
             </div>
@@ -194,26 +187,26 @@
 
     <div id="randomizerTab" class="section">
         <div class="card">
-            <h3>🎲 عجلة القرعة العشوائية</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">🎲 عجلة القرعة العشوائية</h3>
             <div class="controls">
                 <select id="randClassSelect"><option value="">-- اختر القسم (لسحب تلميذ) --</option></select>
                 <select id="randCatSelect"><option value="">-- اختر مجموعة الموضوعات --</option></select>
             </div>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <button class="btn-primary" style="background-color: var(--rand); flex-grow: 1;" onclick="drawRandom('both')">🎲 سحب تلميذ + موضوع</button>
-                <button class="btn-primary" style="background-color: #34495e; flex-grow: 1;" onclick="drawRandom('topic')">🎯 سحب موضوع فقط</button>
+                <button class="btn-primary" style="background-color: var(--secondary); flex-grow: 1;" onclick="drawRandom('topic')">🎯 سحب موضوع فقط</button>
                 <button class="btn-primary" style="background-color: #e67e22; flex-grow: 1;" onclick="drawRandom('student')">👤 سحب تلميذ فقط</button>
             </div>
-            <div id="drawResult" style="display:none; background: var(--log-bg); border: 2px dashed #e67e22; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s;"></div>
+            <div id="drawResult" style="display:none; background: var(--highlight-bg); border: 2px dashed #e67e22; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s;"></div>
         </div>
         <div class="card">
-            <h3>📂 إدارة موضوعات القرعة</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📂 إدارة موضوعات القرعة</h3>
             <div class="controls">
                 <input type="text" id="newRandCatName" placeholder="اسم المجموعة (مثال: موضوعات عامة)">
                 <input type="file" id="randFileInput" accept=".txt">
                 <button class="btn-primary" onclick="addTopicCategory()">➕ إضافة المجموعة</button>
             </div>
-            <strong style="display:block; margin-bottom:10px;">📋 المجموعات المتوفرة:</strong>
+            <strong style="display:block; margin-bottom:10px; color: var(--title-color);">📋 المجموعات المتوفرة:</strong>
             <ul id="randCatList" class="manage-list"></ul>
         </div>
     </div>
@@ -224,9 +217,9 @@
             <select id="lessonClassSelect" onchange="viewLessonLog()"><option value="">-- اختر القسم --</option></select>
         </div>
         <div class="card">
-            <h3>📝 تدوين حصة جديدة</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📝 تدوين حصة جديدة</h3>
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
-                <strong style="white-space: nowrap;">المكون:</strong>
+                <strong style="white-space: nowrap; color: var(--title-color);">المكون:</strong>
                 <select id="compSelect" onchange="toggleCompFields()">
                     <option value="">-- اختر المكون المدرّس --</option>
                     <option value="النصوص">النصوص</option>
@@ -238,7 +231,7 @@
             <div id="comp_texts" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="texts_title" placeholder="عنوان الدرس" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
                 <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
-                    <strong style="color: var(--primary);">📘 الحصة الأولى:</strong>
+                    <strong style="color: var(--accent);">📘 الحصة الأولى:</strong>
                     <div class="options-group" style="background: transparent; padding: 10px 0 0 0;">
                         <label><input type="checkbox" name="texts_s1" value="التقديم"> التقديم</label>
                         <label><input type="checkbox" name="texts_s1" value="ملاحظة النص وصياغة الفرضية"> ملاحظة النص وصياغة الفرضية</label>
@@ -246,7 +239,7 @@
                         <label><input type="checkbox" name="texts_s1" value="تقويم مرحلي"> تقويم مرحلي</label>
                     </div>
                 </div>
-                <div style="background: rgba(211, 84, 0, 0.05); padding: 15px; border-radius: 5px;">
+                <div style="background: var(--highlight-bg); padding: 15px; border-radius: 5px;">
                     <strong style="color: #d35400;">📙 الحصة الثانية:</strong>
                     <div class="options-group" style="background: transparent; padding: 10px 0;">
                         <strong style="font-size: 0.85rem; color: #d35400;">🔍 تحليل النص:</strong>
@@ -283,7 +276,7 @@
             <div id="comp_expr" style="display:none; animation: fadeIn 0.3s;">
                 <input type="text" id="expr_title" placeholder="عنوان المهارة" style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
                 <div class="options-group">
-                    <strong>النشاط المنجز:</strong>
+                    <strong style="color: var(--title-color);">النشاط المنجز:</strong>
                     <label><input type="checkbox" name="expr_steps" value="أنشطة الاكتساب"> أنشطة الاكتساب</label>
                     <label><input type="checkbox" name="expr_steps" value="أنشطة التطبيق"> أنشطة التطبيق</label>
                     <label><input type="checkbox" name="expr_steps" value="أنشطة الإنتاج والتقويم"> أنشطة الإنتاج والتقويم</label>
@@ -291,7 +284,7 @@
             </div>
             <div id="comp_lit" style="display:none; animation: fadeIn 0.3s;">
                 <div class="options-group" style="margin-bottom: 10px;">
-                    <strong>القراءة المنجزة:</strong>
+                    <strong style="color: var(--title-color);">القراءة المنجزة:</strong>
                     <label><input type="checkbox" name="lit_steps" value="القراءة التوجيهية"> القراءة التوجيهية</label>
                     <label><input type="checkbox" name="lit_steps" value="القراءة التحليلية"> القراءة التحليلية</label>
                     <label><input type="checkbox" name="lit_steps" value="القراءة التركيبية"> القراءة التركيبية</label>
@@ -301,7 +294,7 @@
             <button class="btn-primary" style="margin-top: 15px; width: 100%;" onclick="saveLessonLog()">📥 حفظ في دفتر النصوص</button>
         </div>
         <div class="card" id="lessonDisplayArea" style="display:none;">
-            <h3>📖 المنجز في هذا اليوم</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📖 المنجز في هذا اليوم</h3>
             <div id="lessonLogDisplay"></div>
         </div>
     </div>
@@ -310,22 +303,32 @@
         <div class="controls">
             <input type="date" id="miniExamsDate" onchange="loadMiniExams()">
             <select id="miniExamsClassSelect" onchange="loadMiniExams()"><option value="">-- اختر القسم --</option></select>
+            <select id="miniExamTypeSelect" onchange="loadMiniExams()">
+                <option value="">-- اختر نوع الفرض --</option>
+                <option value="خلاصة تركيبية">خلاصة تركيبية</option>
+                <option value="موضوع إنشائي">موضوع إنشائي</option>
+                <option value="تطبيقات لغوية">تطبيقات لغوية</option>
+                <option value="تقويم مرحلي">تقويم مرحلي</option>
+                <option value="تقويم تشخيصي">تقويم تشخيصي</option>
+            </select>
             <button class="btn-primary" onclick="saveMiniExams()">💾 حفظ الفروض المصغرة</button>
         </div>
-        <div id="miniExamsList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+        <div id="miniExamsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم ونوع الفرض.</p></div>
     </div>
 
     <div id="notesTab" class="section">
         <div class="card">
-            <h3>📝 تسجيل ملاحظة خاصة</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📝 تسجيل ملاحظة خاصة</h3>
             <div class="controls">
                 <input type="date" id="noteDate" onchange="loadNoteStudents()">
                 <select id="noteClassSelect" onchange="loadNoteStudents()"><option value="">-- اختر القسم --</option></select>
                 <select id="noteStudentSelect" onchange="loadStudentHistory()" style="display:none;"><option value="">-- اختر التلميذ --</option></select>
             </div>
+            
             <button class="btn-primary" style="margin-bottom: 15px; width: 100%; background-color: #3498db;" onclick="viewClassNotes()">👁️ إظهار جميع الملاحظات في هذا القسم</button>
+
             <div id="noteCheckboxesArea" style="display:none; margin-top:15px; border-top: 2px solid var(--border); padding-top: 15px;">
-                <strong style="display:block; margin-bottom:10px;">اختر الملاحظات للتلميذ المحدد:</strong>
+                <strong style="display:block; margin-bottom:10px; color: var(--title-color);">اختر الملاحظات للتلميذ المحدد:</strong>
                 <div class="options-group" style="flex-direction: column; align-items: flex-start; gap:10px;">
                     <label><input type="checkbox" value="لم يحضر واجباته المدرسية"> لم يحضر واجباته المدرسية</label>
                     <label><input type="checkbox" value="عدم الالتزام بكتابة الدرس"> عدم الالتزام بكتابة الدرس</label>
@@ -340,11 +343,11 @@
                 <button class="btn-primary" style="margin-top:15px;" onclick="saveNotes()">💾 حفظ الملاحظات</button>
             </div>
             <div id="noteHistoryArea" style="display:none; margin-top:20px;">
-                <h3 id="studentArchiveTitle">أرشيف ملاحظات التلميذ</h3>
+                <h3 id="studentArchiveTitle" style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">أرشيف ملاحظات التلميذ</h3>
                 <div id="noteHistory"></div>
             </div>
             <div id="classNotesArea" style="display:none; margin-top:20px;">
-                <h3>أرشيف القسم بأكمله</h3>
+                <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">أرشيف القسم بأكمله</h3>
                 <div id="classNotesDisplay"></div>
             </div>
         </div>
@@ -357,26 +360,27 @@
             <button class="btn-primary" onclick="saveGrades()">💾 حفظ النقط</button>
         </div>
         <div id="gradesActions" style="display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <strong style="width: 100%;">تصدير اللائحة:</strong>
+            <strong style="width: 100%; color: var(--title-color);">تصدير اللائحة:</strong>
             <button class="btn-whatsapp" onclick="shareGrades('whatsapp')">📱 واتساب</button>
             <button class="btn-telegram" onclick="shareGrades('telegram')">✈️ تلغرام</button>
             <button class="btn-excel" onclick="shareGrades('excel')">📊 تصدير Excel (CSV)</button>
         </div>
-        <div id="gradesList"><p style="text-align: center; color: #777; padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
+        <div id="gradesList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
     <div id="reports" class="section">
         <div class="card">
-            <h3>📊 استخراج التقارير</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📊 استخراج التقارير</h3>
             <div class="controls">
-                <select id="reportTypeSelect" onchange="viewReport()" style="flex-grow: 1; font-weight: bold; color: var(--primary);">
+                <select id="reportTypeSelect" onchange="viewReport()" style="flex-grow: 1; font-weight: bold; color: var(--title-color);">
+                    <option value="">-- اختر نوع التقرير --</option>
                     <option value="tracking">تتبع الإعداد والحضور</option>
                     <option value="notes">الملاحظات الخاصة في القسم</option>
                     <option value="lessons">دفتر النصوص التراكمي</option>
                     <option value="miniExams">نقط الفروض المصغرة</option>
                 </select>
             </div>
-            <div class="controls" style="background: rgba(0,0,0,0.02);">
+            <div class="controls" style="background: rgba(128,128,128,0.05);">
                 <input type="date" id="reportDate" onchange="viewReport()">
                 <select id="reportClassSelect" onchange="viewReport()"><option value="">-- اختر القسم --</option></select>
             </div>
@@ -386,7 +390,7 @@
             </div>
             
             <div id="reportActions" style="display: none; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                <button class="btn-primary" style="background-color: #e74c3c;" onclick="printPDFReport()">🖨️ طباعة / استخراج PDF</button>
+                <button class="btn-primary" style="background-color: var(--danger);" onclick="printPDFReport()">🖨️ طباعة / استخراج PDF</button>
                 <button class="btn-whatsapp" onclick="shareReport('whatsapp')">📱 واتساب</button>
                 <button class="btn-telegram" onclick="shareReport('telegram')">✈️ تلغرام</button>
                 <button class="btn-download" onclick="shareReport('download')">⬇️ تحميل نصي</button>
@@ -396,7 +400,7 @@
 
     <div id="management" class="section">
         <div class="card">
-            <h3>📂 إضافة / حذف الأقسام</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📂 إضافة / حذف الأقسام</h3>
             <div class="controls">
                 <input type="text" id="newClassName" placeholder="اسم القسم الجديد">
                 <button class="btn-primary" onclick="addClass()">➕ إضافة القسم</button>
@@ -407,22 +411,22 @@
             </div>
         </div>
         <div class="card" id="studentManagementArea" style="display:none;">
-            <h3>👥 إدارة تلاميذ القسم المختار</h3>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">👥 إدارة تلاميذ القسم المختار</h3>
             <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--border);">
-                <strong style="display:block; margin-bottom:10px;">📥 استيراد لائحة كاملة (txt):</strong>
+                <strong style="display:block; margin-bottom:10px; color: var(--title-color);">📥 استيراد لائحة كاملة (txt):</strong>
                 <div style="display: flex; gap:10px;">
                     <input type="file" id="fileInput" accept=".txt" style="flex-grow:1;">
                     <button class="btn-primary" onclick="importStudents()">استيراد</button>
                 </div>
             </div>
             <div style="margin-bottom: 20px;">
-                <strong style="display:block; margin-bottom:10px;">➕ إضافة تلميذ واحد:</strong>
+                <strong style="display:block; margin-bottom:10px; color: var(--title-color);">➕ إضافة تلميذ واحد:</strong>
                 <div style="display: flex; gap:10px;">
                     <input type="text" id="newStudentName" placeholder="الاسم الكامل للتلميذ">
                     <button class="btn-primary" onclick="addStudent()">إضافة</button>
                 </div>
             </div>
-            <strong style="display:block; margin-bottom:10px;">📋 لائحة التلاميذ الحالية:</strong>
+            <strong style="display:block; margin-bottom:10px; color: var(--title-color);">📋 لائحة التلاميذ الحالية:</strong>
             <ul id="manageStudentList" class="manage-list"></ul>
         </div>
     </div>
