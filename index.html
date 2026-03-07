@@ -55,7 +55,6 @@
         .options-group strong { min-width: 80px; font-size: 0.95rem; width: 100%; color: var(--title-color);}
         .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--card-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border); transition: 0.2s;}
         
-        /* تصميم الإعداد المعطل */
         .disabled-prep { opacity: 0.4; pointer-events: none; text-decoration: line-through; }
 
         .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px;}
@@ -81,19 +80,20 @@
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
         .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
         
-        /* خريطة الجلوس (الوضعية أثناء المراقبة) */
+        /* خريطة الجلوس (الوضعية أثناء المراقبة) - تم التعديل لتوسيعها */
         .classroom-container { background: rgba(128,128,128,0.05); padding: 20px; border-radius: 10px; border: 2px solid var(--border); overflow-x: auto;}
-        .teachers-desk { background: var(--secondary); color: white; text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 30px; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
-        .grid-rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; min-width: 800px; }
-        .desk { background: #dcdde1; padding: 5px; border-radius: 8px; border-bottom: 4px solid #7f8c8d; display: flex; gap: 5px; margin-bottom: 15px;}
-        [data-theme="dark"] .desk { background: #2f3640; border-bottom: 4px solid #1e272e; }
-        .seat { background: var(--card-bg); flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s;}
-        .seat select { padding: 5px; font-size: 0.85rem; width: 100%; min-width: 0;}
+        .teachers-desk { background: var(--secondary); color: white; text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; margin-top: 30px; }
+        .grid-rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-width: 1200px; } /* زيادة العرض الكلي */
+        .desk { background: #dcdde1; padding: 8px; border-radius: 8px; border-bottom: 5px solid #7f8c8d; display: flex; gap: 8px; margin-bottom: 15px;}
+        [data-theme="dark"] .desk { background: #2f3640; border-bottom: 5px solid #1e272e; }
+        .seat { background: var(--card-bg); flex: 1; padding: 10px; border-radius: 4px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; position: relative; transition: 0.3s;}
+        .seat select { padding: 8px 5px; font-size: 1rem; width: 100%; min-width: 0; font-weight: bold; color: var(--primary);} /* تكبير الخط داخل المقعد */
+        [data-theme="dark"] .seat select { color: #a8e6cf; }
         .seat.empty { background: rgba(231, 76, 60, 0.1); border-color: var(--danger); }
-        .seat-actions { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 5px;}
-        .seat-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: 0.2s;}
+        .seat-actions { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 8px;}
+        .seat-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: 0.2s;}
         .seat-btn:hover { background: rgba(0,0,0,0.1); }
-        .warning-badge { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 0.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        .warning-badge { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; width: 25px; height: 25px; border-radius: 50%; font-size: 0.9rem; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 
         #pinScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #2c3e50, #3498db); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;}
         .pin-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; border: 1px solid rgba(255,255,255,0.2); width: 80%; max-width: 350px;}
@@ -190,9 +190,8 @@
             </div>
             
             <div id="classroomMap" class="classroom-container" style="display:none;">
+                <div class="grid-rows" id="desksContainer"></div>
                 <div class="teachers-desk">👨‍🏫 مكتب الأستاذ (السبورة)</div>
-                <div class="grid-rows" id="desksContainer">
-                    </div>
             </div>
             <p id="seatingEmptyMsg" style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار القسم والتاريخ لبدء التوزيع.</p>
         </div>
