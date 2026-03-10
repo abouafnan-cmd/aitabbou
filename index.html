@@ -55,7 +55,7 @@
         .options-group strong { min-width: 80px; font-size: 0.95rem; width: 100%; color: var(--title-color);}
         .options-group label { font-size: 0.9rem; display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--card-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border); transition: 0.2s;}
         
-        .disabled-prep { opacity: 0.4; pointer-events: none; text-decoration: line-through; }
+        .disabled-prep { opacity: 0.4; pointer-events: none; text-decoration: line-through; filter: grayscale(1); }
 
         .grades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px;}
         .grades-grid div { display: flex; flex-direction: column; gap: 5px;}
@@ -80,14 +80,13 @@
         .log-entry ul { margin: 5px 0; padding-right: 20px; }
         .delete-log { position: absolute; left: 15px; top: 15px; background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;}
         
-        /* خريطة الجلوس (الوضعية أثناء المراقبة) - تم التعديل لتوسيعها */
         .classroom-container { background: rgba(128,128,128,0.05); padding: 20px; border-radius: 10px; border: 2px solid var(--border); overflow-x: auto;}
         .teachers-desk { background: var(--secondary); color: white; text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; margin-top: 30px; }
-        .grid-rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-width: 1200px; } /* زيادة العرض الكلي */
+        .grid-rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-width: 1200px; } 
         .desk { background: #dcdde1; padding: 8px; border-radius: 8px; border-bottom: 5px solid #7f8c8d; display: flex; gap: 8px; margin-bottom: 15px;}
         [data-theme="dark"] .desk { background: #2f3640; border-bottom: 5px solid #1e272e; }
         .seat { background: var(--card-bg); flex: 1; padding: 10px; border-radius: 4px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; position: relative; transition: 0.3s;}
-        .seat select { padding: 8px 5px; font-size: 1rem; width: 100%; min-width: 0; font-weight: bold; color: var(--primary);} /* تكبير الخط داخل المقعد */
+        .seat select { padding: 8px 5px; font-size: 1rem; width: 100%; min-width: 0; font-weight: bold; color: var(--primary);} 
         [data-theme="dark"] .seat select { color: #a8e6cf; }
         .seat.empty { background: rgba(231, 76, 60, 0.1); border-color: var(--danger); }
         .seat-actions { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 8px;}
@@ -112,6 +111,9 @@
         .dash-card p { margin: 5px 0 0 0; font-size: 1rem; opacity: 0.9;}
         .dash-card.blue { background: #3498db; }
         .dash-card.red { background: #e74c3c; }
+
+        /* شريط حالة الحصة */
+        .session-status-bar { background: rgba(52, 152, 219, 0.1); border: 1px solid #3498db; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -177,6 +179,20 @@
             <select id="classSelect" onchange="loadStudents()"><option value="">-- اختر القسم --</option></select>
             <input type="text" class="search-bar" id="searchTracking" placeholder="🔍 بحث سريع عن تلميذ..." onkeyup="filterList('searchTracking', 'studentsList')">
         </div>
+        
+        <div id="sessionStatusContainer" class="session-status-bar" style="display:none;">
+            <strong style="color: var(--primary);">وضعية الحصة:</strong>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="sessionStatus" value="normal" checked onchange="changeSessionStatus()"> حصة عادية (تتبع الإعداد)
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="sessionStatus" value="no_prep" onchange="changeSessionStatus()"> لم يتم التكليف بالإعداد
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="sessionStatus" value="exam" onchange="changeSessionStatus()"> إنجاز فرض محروس
+            </label>
+        </div>
+
         <div id="studentsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو اختيار التاريخ والقسم.</p></div>
     </div>
 
@@ -188,7 +204,6 @@
                 <select id="seatingClassSelect" onchange="loadSeatingMap()"><option value="">-- اختر القسم لتوزيع المقاعد --</option></select>
                 <button class="btn-primary" onclick="saveSeatingMap()">💾 حفظ وضعية المراقبة</button>
             </div>
-            
             <div id="classroomMap" class="classroom-container" style="display:none;">
                 <div class="grid-rows" id="desksContainer"></div>
                 <div class="teachers-desk">👨‍🏫 مكتب الأستاذ (السبورة)</div>

@@ -31,6 +31,7 @@ function initDBStructure() {
     if (!db.disciplinary) db.disciplinary = {};
     if (!db.bonusPoints) db.bonusPoints = {};
     if (!db.seatingMaps) db.seatingMaps = {}; 
+    if (!db.sessionMeta) db.sessionMeta = {}; // إضافة حفظ حالة الحصة
 }
 initDBStructure();
 
@@ -206,7 +207,7 @@ function loadDashboard() {
     document.getElementById('dashGrid').innerHTML = `<div class="dash-card blue"><h2>${totalStudents}</h2><p>إجمالي التلاميذ</p></div><div class="dash-card" style="background:var(--secondary);"><h2>${classesCount}</h2><p>الأقسام المسجلة</p></div><div class="dash-card red"><h2>${todayAbsences}</h2><p>غيابات اليوم</p></div>`;
 }
 
-/* ================== خريطة المراقبة (محدثة: 48 مقعداً ومكتب بالأسفل) ================== */
+/* ================== خريطة المراقبة (48 مقعداً ومكتب بالأسفل) ================== */
 function loadSeatingMap() {
     const date = document.getElementById('seatingDate').value;
     const cls = document.getElementById('seatingClassSelect').value;
@@ -305,7 +306,7 @@ function changeSeatProp(seatIndex, prop, val = null) {
 function saveSeatingMap() { saveToCloud(true); }
 
 
-/* ================== تتبع الأداء ================== */
+/* ================== تتبع الأداء وبنك النقط والحالة ================== */
 function updateBonus(cls, student, val) {
     if(!db.bonusPoints[cls]) db.bonusPoints[cls] = {};
     if(!db.bonusPoints[cls][student]) db.bonusPoints[cls][student] = 0;
@@ -314,18 +315,42 @@ function updateBonus(cls, student, val) {
     saveToCloud(false, true); loadStudents();
 }
 
+function changeSessionStatus() {
+    const date = document.getElementById('recordDate').value;
+    const cls = document.getElementById('classSelect').value;
+    if(!date || !cls) return;
+    const status = document.querySelector('input[name="sessionStatus"]:checked').value;
+    if (!db.sessionMeta) db.sessionMeta = {};
+    if (!db.sessionMeta[date]) db.sessionMeta[date] = {};
+    db.sessionMeta[date][cls] = status;
+    saveToCloud(false, true);
+    loadStudents();
+}
+
 function autoSaveTracking() {
     const date = document.getElementById('recordDate').value;
     const cls = document.getElementById('classSelect').value;
     if (!date || !cls || !db.students[cls]) return;
     if (!db.records[date]) db.records[date] = {}; 
     let rec = [];
+    
+    // جلب حالة الحصة لمعرفة هل نحفظ الإعداد أم لا
+    let sessionType = 'normal';
+    if(db.sessionMeta && db.sessionMeta[date] && db.sessionMeta[date][cls]) {
+        sessionType = db.sessionMeta[date][cls];
+    }
+    const disablePrep = (sessionType !== 'normal');
+
     db.students[cls].forEach((student, i) => { 
+        let prepVal = 'لم ينجز';
+        const prepNode = document.querySelector(`input[name="prep_${i}"]:checked`);
+        if(!disablePrep && prepNode) prepVal = prepNode.value;
+
         rec.push({ 
             number: i + 1, 
             name: student, 
             attendance: document.querySelector(`input[name="att_${i}"]:checked`).value, 
-            preparation: document.querySelector(`input[name="prep_${i}"]:checked`) ? document.querySelector(`input[name="prep_${i}"]:checked`).value : 'لم ينجز'
+            preparation: prepVal
         }); 
     });
     db.records[date][cls] = rec;
@@ -339,7 +364,14 @@ function handleAttendanceChange(index) {
     const prepRadios = document.querySelectorAll(`input[name="prep_${index}"]`);
     const prepContainer = prepRadios[0].parentElement.parentElement; 
     
-    if (att === 'غائب') {
+    const date = document.getElementById('recordDate').value;
+    const cls = document.getElementById('classSelect').value;
+    let sessionType = 'normal';
+    if(db.sessionMeta && db.sessionMeta[date] && db.sessionMeta[date][cls]) {
+        sessionType = db.sessionMeta[date][cls];
+    }
+
+    if (att === 'غائب' || sessionType !== 'normal') {
         prepContainer.classList.add('disabled-prep');
         prepRadios.forEach(r => { r.checked = false; });
     } else {
@@ -355,18 +387,32 @@ function loadStudents() {
     const date = document.getElementById('recordDate').value;
     const cls = document.getElementById('classSelect').value;
     const list = document.getElementById('studentsList');
+    const sessionStatusContainer = document.getElementById('sessionStatusContainer');
     document.getElementById('searchTracking').value = ''; 
     list.innerHTML = '';
+    
     if (!cls || !db.students[cls] || db.students[cls].length === 0) {
+        sessionStatusContainer.style.display = 'none';
         return list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد تلاميذ.</p>';
     }
+    
+    sessionStatusContainer.style.display = 'flex';
+    let sessionType = 'normal';
+    if (db.sessionMeta && db.sessionMeta[date] && db.sessionMeta[date][cls]) {
+        sessionType = db.sessionMeta[date][cls];
+    }
+    document.querySelector(`input[name="sessionStatus"][value="${sessionType}"]`).checked = true;
+
+    const globalPrepDisabled = (sessionType !== 'normal');
     const saved = (db.records[date] && db.records[date][cls]) ? db.records[date][cls] : null;
+    
     let html = '';
     db.students[cls].forEach((student, index) => {
         let att = "حاضر", prep = "لم ينجز";
         if (saved) { const rec = saved.find(s => s.name === student); if (rec) { att = rec.attendance; prep = rec.preparation; } }
         let bonus = (db.bonusPoints[cls] && db.bonusPoints[cls][student]) ? db.bonusPoints[cls][student] : 0;
-        let disabledClass = (att === 'غائب') ? 'disabled-prep' : '';
+        
+        let disabledClass = (att === 'غائب' || globalPrepDisabled) ? 'disabled-prep' : '';
 
         html += `<div class="student-row">
             <div class="student-name">
@@ -389,6 +435,7 @@ function loadStudents() {
                 <label><input type="radio" name="prep_${index}" value="إنجاز جيد" onchange="autoSaveTracking()" ${prep==='إنجاز جيد'?'checked':''}> إنجاز جيد</label>
             </div></div>`;
     });
+    
     html += `<button class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveData()">✅ تأكيد الحفظ النهائي للحصة</button>`;
     list.innerHTML = html;
 }
@@ -451,16 +498,19 @@ function viewPortfolio() {
     display.innerHTML = html; display.style.display = 'block';
 }
 
-/* ================== الملاحظات الخاصة ================== */
+/* ================== الملاحظات الخاصة والحذف ================== */
 function loadNoteStudents() {
     const cls = document.getElementById('noteClassSelect').value;
     const select = document.getElementById('noteStudentSelect');
     const searchInput = document.getElementById('searchNotes');
+    
     document.getElementById('noteCheckboxesArea').style.display = 'none';
     document.getElementById('noteHistoryArea').style.display = 'none';
     document.getElementById('classNotesArea').style.display = 'none';
     searchInput.value = '';
+    
     if (!cls || !db.students[cls]) { select.style.display = 'none'; searchInput.style.display = 'none'; return; }
+    
     select.innerHTML = '<option value="">-- اختر التلميذ --</option>';
     db.students[cls].forEach((s, i) => select.innerHTML += `<option value="${s}">${i+1} - ${s}</option>`);
     select.style.display = 'block'; searchInput.style.display = 'block';
@@ -479,10 +529,12 @@ function loadStudentHistory() {
         const todayNotes = db.notes[cls][student][date];
         document.querySelectorAll('#noteCheckboxesArea input[type="checkbox"]').forEach(cb => { if (todayNotes.includes(cb.value)) cb.checked = true; });
     }
+    
     cbArea.style.display = 'block';
     const histDiv = document.getElementById('noteHistory');
     histDiv.innerHTML = '';
     let hasHistory = false;
+    
     if (db.notes[cls] && db.notes[cls][student]) {
         Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
             const notes = db.notes[cls][student][d];
@@ -538,6 +590,7 @@ function viewClassNotes() {
             let studentHtml = `<div style="background: rgba(128,128,128,0.05); padding: 10px; border-radius: 5px; margin-bottom: 10px; border-right: 4px solid var(--primary);">`;
             studentHtml += `<h4 style="margin: 0 0 10px 0; color: var(--title-color);">👤 ${student}</h4>`;
             let hasStudentNotes = false;
+            
             Object.keys(db.notes[cls][student]).sort((a,b) => new Date(b) - new Date(a)).forEach(d => {
                 const notes = db.notes[cls][student][d];
                 if (notes.length > 0) {
@@ -633,7 +686,7 @@ function calcAvg(index) { const e1=parseFloat(document.getElementById(`e1_${inde
 function saveGrades() { const date = document.getElementById('gradesDate').value; const cls = document.getElementById('gradesClassSelect').value; if (!date || !cls) return; if (!db.grades[date]) db.grades[date] = {}; db.grades[date][cls] = {}; db.students[cls].forEach((student, index) => { db.grades[date][cls][student] = { e1: document.getElementById(`e1_${index}`).value, e2: document.getElementById(`e2_${index}`).value, act: document.getElementById(`act_${index}`).value, avg: document.getElementById(`avg_${index}`).innerText }; }); saveToCloud(true); }
 function shareGrades(type) { /* الكود السابق */ }
 
-/* ================== التقارير الشاملة ================== */
+/* ================== التقارير الشاملة المحدثة ================== */
 function viewReport() {
     const reportType = document.getElementById('reportTypeSelect').value;
     const date = document.getElementById('reportDate').value;
@@ -643,8 +696,8 @@ function viewReport() {
     const dateInput = document.getElementById('reportDate');
 
     if (!selClass || !reportType) { display.style.display = 'none'; actions.style.display = 'none'; return; }
-    dateInput.style.display = (reportType === 'tracking' || reportType === 'miniExams') ? 'block' : 'none';
     
+    dateInput.style.display = (reportType === 'tracking' || reportType === 'miniExams') ? 'block' : 'none';
     display.innerHTML = ''; currentReportText = '';
 
     if (reportType === 'tracking') {
@@ -653,6 +706,12 @@ function viewReport() {
             display.style.display = 'block'; actions.style.display = 'none'; return; 
         }
         const records = db.records[date][selClass];
+        
+        let sessionType = 'normal';
+        if(db.sessionMeta && db.sessionMeta[date] && db.sessionMeta[date][selClass]) {
+            sessionType = db.sessionMeta[date][selClass];
+        }
+
         const formatName = s => `(${s.number || (db.students[selClass].indexOf(s.name) + 1)}) ${s.name}`;
         const prepGood = records.filter(s => s.preparation === "إنجاز جيد" && s.attendance !== "غائب").map(formatName);
         const prepMed = records.filter(s => s.preparation === "إنجاز متوسط" && s.attendance !== "غائب").map(formatName);
@@ -661,15 +720,29 @@ function viewReport() {
         const absentees = records.filter(s => s.attendance === "غائب").map(formatName);
         const late = records.filter(s => s.attendance === "متأخر").map(formatName);
 
-        let html = `<h4 style="color:var(--title-color);">🗓️ تتبع الحضور والإعداد: ${selClass} (${date})</h4><ul style="color:var(--text);">`;
-        html += `<li><strong>إنجاز جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
-        html += `<li><strong>إنجاز متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
-        html += `<li><strong>إنجاز ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li></ul>`;
-        html += `<strong style="color:var(--danger);">❌ لم ينجزوا (${noPrep.length}):</strong><br> <span style="color:var(--text);">${noPrep.join('، ') || '-'}</span><br><br>`;
+        let html = `<h4 style="color:var(--title-color);">🗓️ تقرير الحضور والإعداد: ${selClass} (${date})</h4><ul style="color:var(--text);">`;
+        let txt = `*تقرير الإعداد والحضور: ${selClass} (${date})*\n\n`;
+
+        if (sessionType === 'normal') {
+            html += `<li><strong>إنجاز جيد (${prepGood.length}):</strong> ${prepGood.join('، ') || '-'}</li>`;
+            html += `<li><strong>إنجاز متوسط (${prepMed.length}):</strong> ${prepMed.join('، ') || '-'}</li>`;
+            html += `<li><strong>إنجاز ضعيف (${prepWeak.length}):</strong> ${prepWeak.join('، ') || '-'}</li></ul>`;
+            html += `<strong style="color:var(--danger);">❌ لم ينجزوا (${noPrep.length}):</strong><br> <span style="color:var(--text);">${noPrep.join('، ') || '-'}</span><br><br>`;
+            
+            txt += `*المنجزون للإعداد:*\n- جيد: ${prepGood.join('، ') || '-'}\n- متوسط: ${prepMed.join('، ') || '-'}\n- ضعيف: ${prepWeak.join('، ') || '-'}\n\n*لم ينجزوا:*\n${noPrep.join('، ') || 'لا يوجد'}\n\n`;
+        } else if (sessionType === 'no_prep') {
+            html += `</ul><p style="color:var(--secondary); background: rgba(0,0,0,0.05); padding:10px; border-radius:5px;">ℹ️ لم يتم تكليف التلاميذ بواجبات لينجزوها في هذه الحصة.</p>`;
+            txt += `ℹ️ لم يتم تكليف التلاميذ بواجبات لينجزوها في هذه الحصة.\n\n`;
+        } else if (sessionType === 'exam') {
+            html += `</ul><p style="color:var(--danger); background: rgba(231, 76, 60, 0.1); padding:10px; border-radius:5px;">📝 تم تخصيص هذه الحصة لإجراء فرض محروس.</p>`;
+            txt += `📝 تم تخصيص هذه الحصة لإجراء فرض محروس.\n\n`;
+        }
+
         html += `<strong style="color:var(--danger);">🚫 المتغيبون (${absentees.length}):</strong><br> <span style="color:var(--text);">${absentees.join('، ') || '-'}</span><br><br>`;
         html += `<strong style="color:#f39c12;">⏳ المتأخرون (${late.length}):</strong><br> <span style="color:var(--text);">${late.join('، ') || '-'}</span>`;
-        display.innerHTML = html;
-        currentReportText = `*تقرير الإعداد والحضور: ${selClass} (${date})*\n\n*المنجزون للإعداد:*\n- جيد: ${prepGood.join('، ') || '-'}\n- متوسط: ${prepMed.join('، ') || '-'}\n- ضعيف: ${prepWeak.join('، ') || '-'}\n\n*لم ينجزوا:*\n${noPrep.join('، ') || 'لا يوجد'}\n\n*الغياب:*\n${absentees.join('، ') || 'لا يوجد'}\n\n*التأخر:*\n${late.join('، ') || 'لا يوجد'}`;
+        txt += `*الغياب:*\n${absentees.join('، ') || 'لا يوجد'}\n\n*التأخر:*\n${late.join('، ') || 'لا يوجد'}`;
+
+        display.innerHTML = html; currentReportText = txt;
         display.style.display = 'block'; actions.style.display = 'flex';
     } 
     else if (reportType === 'notes') {
@@ -730,17 +803,14 @@ function viewReport() {
             display.innerHTML = '<p style="text-align:center; color:var(--danger);">لا توجد نقط فروض مصغرة محفوظة لهذا التاريخ.</p>';
             display.style.display = 'block'; actions.style.display = 'none'; return; 
         }
-        
         let html = `<h4 style="color:var(--title-color);">📝 تقرير الفروض المصغرة: ${selClass} (${date})</h4>`;
         let txt = `*تقرير الفروض المصغرة: ${selClass} (${date})*\n\n`;
         const dayExams = db.miniExams[date][selClass];
-        
         for(let type in dayExams) {
             html += `<h5 style="color:var(--accent); margin-bottom:5px;">📌 نشاط: ${type}</h5>`;
             html += `<table style="width:100%; border-collapse: collapse; margin-bottom:15px; border: 1px solid var(--border); color:var(--text);">`;
             html += `<tr style="background:var(--primary); color:white;"><th style="padding:8px; border:1px solid var(--border);">التلميذ</th><th style="padding:8px; border:1px solid var(--border);">التقييم</th></tr>`;
             txt += `📌 نشاط: ${type}\n`;
-            
             db.students[selClass].forEach((student, idx) => {
                 const grade = dayExams[type][student];
                 if(grade) {
@@ -748,8 +818,7 @@ function viewReport() {
                     txt += `${idx+1}- ${student} | ${grade}\n`;
                 }
             });
-            html += `</table>`;
-            txt += `-------------------\n`;
+            html += `</table>`; txt += `-------------------\n`;
         }
         display.innerHTML = html; currentReportText = txt;
         display.style.display = 'block'; actions.style.display = 'flex';
@@ -758,7 +827,7 @@ function viewReport() {
 function shareReport(type) { /* الكود السابق */ }
 function printPDFReport() { const printArea = document.getElementById('printArea'); if(printArea.innerHTML.trim() === '' || document.getElementById('reportDisplay').style.display === 'none') { return alert("لا يوجد تقرير لطباعته. المرجو استخراج التقرير أولاً."); } window.print(); }
 
-/* ================== باقي الدوال الاعتيادية (دفتر النصوص، الإجراءات، الإدارة، القرعة) ================== */
+/* ================== دوال فرعية لا تتأثر ================== */
 function toggleCompFields() { const c = document.getElementById('compSelect').value; ['texts','lang','expr','lit'].forEach(x => document.getElementById('comp_'+x).style.display = (c.includes(x==='texts'?'النصوص':x==='lang'?'اللغوي':x==='expr'?'الإنشاء':'المؤلفات')) ? 'block' : 'none'); }
 function saveLessonLog() { const date = document.getElementById('lessonDate').value; const cls = document.getElementById('lessonClassSelect').value; const comp = document.getElementById('compSelect').value; if (!date || !cls || !comp) return alert("المرجو إكمال الاختيارات."); let entry = { id: Date.now(), component: comp, details: {} }; if (comp === 'النصوص') { entry.details.title = document.getElementById('texts_title').value; entry.details.session1 = Array.from(document.querySelectorAll('input[name="texts_s1"]:checked')).map(cb => cb.value); entry.details.analysis = Array.from(document.querySelectorAll('input[name="texts_s2_analysis"]:checked')).map(cb => cb.value); entry.details.session2_end = Array.from(document.querySelectorAll('input[name="texts_s2_end"]:checked')).map(cb => cb.value); } else if (comp === 'الدرس اللغوي') { entry.details.title = document.getElementById('lang_title').value; } else if (comp === 'التعبير والإنشاء') { entry.details.title = document.getElementById('expr_title').value; entry.details.steps = Array.from(document.querySelectorAll('input[name="expr_steps"]:checked')).map(cb => cb.value); } else if (comp === 'المؤلفات') { entry.details.steps = Array.from(document.querySelectorAll('input[name="lit_steps"]:checked')).map(cb => cb.value); entry.details.content = document.getElementById('lit_content').value; } if (!db.lessonLog[date]) db.lessonLog[date] = {}; if (!db.lessonLog[date][cls]) db.lessonLog[date][cls] = []; db.lessonLog[date][cls].push(entry); document.querySelectorAll('#lessonLogTab input[type="text"], #lessonLogTab textarea').forEach(el => el.value = ''); document.querySelectorAll('#lessonLogTab input[type="checkbox"]').forEach(el => el.checked = false); document.getElementById('compSelect').value = ''; toggleCompFields(); saveToCloud(true); viewLessonLog(); }
 function viewLessonLog() { const date = document.getElementById('lessonDate').value; const cls = document.getElementById('lessonClassSelect').value; const area = document.getElementById('lessonDisplayArea'); const display = document.getElementById('lessonLogDisplay'); if (!date || !cls || !db.lessonLog[date] || !db.lessonLog[date][cls] || db.lessonLog[date][cls].length === 0) { area.style.display = 'none'; return; } const logs = db.lessonLog[date][cls]; let html = ''; logs.forEach(log => { html += `<div class="log-entry"><button class="delete-log" onclick="deleteLessonLog(${log.id})">حذف</button><h4 style="color:var(--title-color);">📘 المكون: ${log.component}</h4>`; if (log.component === 'النصوص') { if(log.details.title) html += `<strong style="color:var(--text);">العنوان:</strong> <span style="color:var(--text);">${log.details.title}</span><br>`; if(log.details.session1 && log.details.session1.length > 0) html += `<strong style="color:var(--text);">الحصة الأولى:</strong><ul style="color:var(--text);"><li>${log.details.session1.join('</li><li>')}</li></ul>`; if(log.details.analysis && log.details.analysis.length > 0) html += `<strong style="color:var(--text);">الحصة الثانية (تحليل):</strong><ul style="color:var(--text);"><li>${log.details.analysis.join('</li><li>')}</li></ul>`; if(log.details.session2_end && log.details.session2_end.length > 0) html += `<strong style="color:var(--text);">خواتيم:</strong><ul style="color:var(--text);"><li>${log.details.session2_end.join('</li><li>')}</li></ul>`; } else if (log.component === 'الدرس اللغوي') { html += `<strong style="color:var(--text);">الظاهرة اللغوية:</strong> <span style="color:var(--text);">${log.details.title || 'لم يحدد'}</span><br>`; } else if (log.component === 'التعبير والإنشاء') { if(log.details.title) html += `<strong style="color:var(--text);">المهارة:</strong> <span style="color:var(--text);">${log.details.title}</span><br>`; if(log.details.steps && log.details.steps.length > 0) html += `<strong style="color:var(--text);">النشاط:</strong><ul style="color:var(--text);"><li>${log.details.steps.join('</li><li>')}</li></ul>`; } else if (log.component === 'المؤلفات') { if(log.details.steps && log.details.steps.length > 0) html += `<strong style="color:var(--text);">القراءة:</strong><ul style="color:var(--text);"><li>${log.details.steps.join('</li><li>')}</li></ul>`; if(log.details.content) html += `<strong style="color:var(--text);">المحتوى المنجز:</strong><p style="margin-top:5px; background:var(--card-bg); color:var(--text); padding:10px; border-radius:4px;">${log.details.content}</p>`; } html += `</div>`; }); display.innerHTML = html; area.style.display = 'block'; }
