@@ -37,7 +37,7 @@
         
         .search-bar { flex-grow: 1; min-width: 100%; border: 2px solid var(--accent) !important; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2327ae60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat; background-position: right 10px center; padding-right: 35px !important; }
         
-        select, input[type="text"], input[type="number"], input[type="date"], input[type="file"], input[type="password"], textarea { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem; background-color: var(--input-bg); color: var(--text); }
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="month"], input[type="file"], input[type="password"], textarea { padding: 10px; font-family: inherit; border: 1px solid var(--border); border-radius: 5px; font-size: 1rem; background-color: var(--input-bg); color: var(--text); }
         select, input[type="text"], textarea { flex-grow: 1; min-width: 200px;}
         textarea { resize: vertical; min-height: 80px;}
         button { cursor: pointer; font-weight: bold; transition: 0.3s; color: white; border: none; padding: 10px; border-radius: 5px;}
@@ -112,7 +112,6 @@
         .dash-card.blue { background: #3498db; }
         .dash-card.red { background: #e74c3c; }
 
-        /* شريط حالة الحصة */
         .session-status-bar { background: rgba(52, 152, 219, 0.1); border: 1px solid #3498db; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -204,6 +203,7 @@
                 <select id="seatingClassSelect" onchange="loadSeatingMap()"><option value="">-- اختر القسم لتوزيع المقاعد --</option></select>
                 <button class="btn-primary" onclick="saveSeatingMap()">💾 حفظ وضعية المراقبة</button>
             </div>
+            
             <div id="classroomMap" class="classroom-container" style="display:none;">
                 <div class="grid-rows" id="desksContainer"></div>
                 <div class="teachers-desk">👨‍🏫 مكتب الأستاذ (السبورة)</div>
@@ -377,7 +377,6 @@
                 <option value="تقويم تشخيصي">تقويم تشخيصي</option>
             </select>
             <input type="text" class="search-bar" id="searchMiniExams" placeholder="🔍 بحث سريع عن تلميذ..." onkeyup="filterList('searchMiniExams', 'miniExamsList')">
-            <button class="btn-primary" style="width: 100%;" onclick="saveMiniExams()">💾 حفظ الفروض المصغرة</button>
         </div>
         <div id="miniExamsList"><p style="text-align: center; color: var(--text-muted); padding: 20px;">المرجو إكمال الاختيارات أعلاه.</p></div>
     </div>
@@ -441,7 +440,7 @@
         <div class="card">
             <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📊 استخراج التقارير</h3>
             <div class="controls">
-                <select id="reportTypeSelect" onchange="viewReport()" style="flex-grow: 1; font-weight: bold; color: var(--title-color);">
+                <select id="reportTypeSelect" onchange="toggleReportInputs()" style="flex-grow: 1; font-weight: bold; color: var(--title-color);">
                     <option value="">-- اختر نوع التقرير --</option>
                     <option value="tracking">تتبع الإعداد والحضور</option>
                     <option value="notes">الملاحظات الخاصة في القسم</option>
@@ -449,10 +448,19 @@
                     <option value="miniExams">نقط الفروض المصغرة</option>
                 </select>
             </div>
+            
             <div class="controls" style="background: rgba(128,128,128,0.05);">
-                <input type="date" id="reportDate" onchange="viewReport()">
+                <select id="reportTimeframeSelect" onchange="toggleReportInputs()" style="display:none;">
+                    <option value="daily">تقرير يومي</option>
+                    <option value="monthly">التقرير الشهري</option>
+                    <option value="all">التقرير الشامل (الموسم كامل)</option>
+                </select>
+                
+                <input type="date" id="reportDate" onchange="viewReport()" style="display:none;">
+                <input type="month" id="reportMonth" onchange="viewReport()" style="display:none;">
                 <select id="reportClassSelect" onchange="viewReport()"><option value="">-- اختر القسم --</option></select>
             </div>
+            <button class="btn-primary" style="width: 100%; margin-bottom: 15px;" onclick="viewReport()">🔄 عرض التقرير المخصص</button>
             
             <div id="printArea">
                 <div id="reportDisplay" style="display:none; margin-top: 15px;"></div>
